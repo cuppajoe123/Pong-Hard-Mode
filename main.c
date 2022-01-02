@@ -38,7 +38,7 @@ int main(void)
     }
 
     // load the paddle image into memory using SDL_image library function
-    SDL_Surface *surface = IMG_Load("resources/Paddle.png");
+    SDL_Surface *surface = IMG_Load("resources/paddle.png");
     if (!surface) {
         printf("error creating surface\n");
         SDL_DestroyRenderer(rend);
@@ -58,21 +58,30 @@ int main(void)
         return 1;
     }
 
-    // struct to hold the position and size of the paddle sprite
-    SDL_Rect dest;
+    // struct to hold the position and size of both paddle sprites
+    SDL_Rect left_pad;
+    SDL_Rect right_pad;
 
     // get and scale the dimensions of texture
-    SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
-    dest.w /= 2;
-    dest.h /= 2;
+    SDL_QueryTexture(tex, NULL, NULL, &left_pad.w, &left_pad.h);
+    left_pad.w /= 2;
+    left_pad.h /= 2;
+    right_pad.w = left_pad.w;
+    right_pad.h = left_pad.h;
 
-    // start sprite in the left side of the screen with some space from the window border
-    float x_pos = (float)(WINDOW_WIDTH - (WINDOW_WIDTH - 10));
-    float y_pos = (float)(WINDOW_HEIGHT - dest.h) / 2;
-
+    // start left paddle sprite in the left side of the screen with some space from the window border
+    float left_pad_x_pos = (float)(WINDOW_WIDTH - (WINDOW_WIDTH - 10));
+    float left_pad_y_pos = (float)(WINDOW_HEIGHT - left_pad.h) / 2;
     // set the positions in the struct
-    dest.y = (int) y_pos;
-    dest.x = (int) x_pos;
+    left_pad.y = (int) left_pad_y_pos;
+    left_pad.x = (int) left_pad_x_pos;
+
+    // start right paddle sprite on right side of the screen with some space from the window border
+    float right_pad_x_pos = (float)(WINDOW_WIDTH - 10);
+    float right_pad_y_pos = (float)(WINDOW_HEIGHT - left_pad.h) / 2;
+    // set the positions in the struct
+    right_pad.y = (int) right_pad_y_pos;
+    right_pad.x = (int) right_pad_x_pos;
 
     // initial velocity set to zero
     float x_vel = 0;
@@ -126,24 +135,36 @@ int main(void)
         if (down && !up) y_vel = SPEED;
 
         // update positions
-        x_pos += x_vel / 60;
-        y_pos += y_vel / 60;
+        left_pad_x_pos += x_vel / 60;
+        right_pad_x_pos += x_vel / 60;
+        left_pad_y_pos += y_vel / 60;
+        right_pad_y_pos += y_vel / 60;
 
         // collision detection with bounds
-        if (x_pos <= 0) x_pos = 0;
-        if (y_pos <= 0) y_pos = 0;
-        if (x_pos >= WINDOW_WIDTH - dest.w) x_pos = WINDOW_WIDTH - dest.w;
-        if (y_pos >= WINDOW_HEIGHT - dest.h) y_pos = WINDOW_HEIGHT - dest.h;
+        // only checks left paddle because both paddles will have the same y position
+        if (left_pad_y_pos <= 0) {
+            left_pad_y_pos = 0;
+            right_pad_y_pos = 0;
+        }
+        if (left_pad_y_pos >= WINDOW_HEIGHT - left_pad.h) {
+            left_pad_y_pos = WINDOW_HEIGHT - left_pad.h;
+            right_pad_y_pos = WINDOW_HEIGHT - right_pad.h;
+        }
 
         // set the positions in the struct
-        dest.y = (int) y_pos;
-        dest.x = (int) x_pos;
+        left_pad.y = (int) left_pad_y_pos;
+        left_pad.x = (int) left_pad_x_pos;
+        right_pad.y = (int) right_pad_y_pos;
+        right_pad.x = (int) right_pad_x_pos;
 
         // clear the window
         SDL_RenderClear(rend);
 
-        // draw the image to the window
-        SDL_RenderCopy(rend, tex, NULL, &dest);
+        // draw the left paddle to the window
+        SDL_RenderCopy(rend, tex, NULL, &left_pad);
+        SDL_RenderPresent(rend);
+
+        SDL_RenderCopy(rend, tex, NULL, &right_pad);
         SDL_RenderPresent(rend);
 
         // wait 1/60th of a second

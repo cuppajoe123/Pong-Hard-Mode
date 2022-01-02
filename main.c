@@ -9,6 +9,12 @@
 // speed in pixels/second
 #define SPEED (300)
 
+/* the window and renderer variables are global so other functions can use them without having to pass them as arguments */
+SDL_Window *win;
+SDL_Renderer *rend;
+
+SDL_Texture *make_texture(char *img);
+
 int main(void)
 {
     // attempt to initialize graphics system
@@ -17,7 +23,8 @@ int main(void)
         return 1;
     }
 
-    SDL_Window *win = SDL_CreateWindow("Pong: Hard Mode!",
+    // create a window
+    win = SDL_CreateWindow("Pong: Hard Mode!",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
                                         WINDOW_WIDTH, WINDOW_HEIGHT, 0);
@@ -29,7 +36,7 @@ int main(void)
 
     // create a renderer
     Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-    SDL_Renderer *rend = SDL_CreateRenderer(win, -1, render_flags);
+    rend = SDL_CreateRenderer(win, -1, render_flags);
     if (!rend) {
         printf("error creating renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(win);
@@ -37,33 +44,14 @@ int main(void)
         return 1;
     }
 
-    // load the paddle image into memory using SDL_image library function
-    SDL_Surface *surface = IMG_Load("resources/paddle.png");
-    if (!surface) {
-        printf("error creating surface\n");
-        SDL_DestroyRenderer(rend);
-        SDL_DestroyWindow(win);
-        SDL_Quit();
-        return 1;
-    }
-
-    // load the paddle image into the graphics hardware's memory
-    SDL_Texture *tex = SDL_CreateTextureFromSurface(rend, surface);
-    SDL_FreeSurface(surface);
-    if (!tex) {
-        printf("error creating texture: %s\n", SDL_GetError());
-        SDL_DestroyRenderer(rend);
-        SDL_DestroyWindow(win);
-        SDL_Quit();
-        return 1;
-    }
+    SDL_Texture *paddle_tex = make_texture("resources/paddle.png");
 
     // struct to hold the position and size of both paddle sprites
     SDL_Rect left_pad;
     SDL_Rect right_pad;
 
-    // get and scale the dimensions of texture
-    SDL_QueryTexture(tex, NULL, NULL, &left_pad.w, &left_pad.h);
+    // get and scale the dimensions of paddle_texture
+    SDL_QueryTexture(paddle_tex, NULL, NULL, &left_pad.w, &left_pad.h);
     left_pad.w /= 2;
     left_pad.h /= 2;
     right_pad.w = left_pad.w;
@@ -84,8 +72,8 @@ int main(void)
     right_pad.x = (int) right_pad_x_pos;
 
     // initial velocity set to zero
-    float x_vel = 0;
-    float y_vel = 0;
+    float pad_x_vel = 0;
+    float pad_y_vel = 0;
 
     // keep track of which inputs are given
     bool up = false;
@@ -130,15 +118,15 @@ int main(void)
         }
 
         // determine velocity
-        x_vel = y_vel = 0;
-        if (up && !down) y_vel = -SPEED;
-        if (down && !up) y_vel = SPEED;
+        pad_x_vel = pad_y_vel = 0;
+        if (up && !down) pad_y_vel = -SPEED;
+        if (down && !up) pad_y_vel = SPEED;
 
         // update positions
-        left_pad_x_pos += x_vel / 60;
-        right_pad_x_pos += x_vel / 60;
-        left_pad_y_pos += y_vel / 60;
-        right_pad_y_pos += y_vel / 60;
+        left_pad_x_pos += pad_x_vel / 60;
+        right_pad_x_pos += pad_x_vel / 60;
+        left_pad_y_pos += pad_y_vel / 60;
+        right_pad_y_pos += pad_y_vel / 60;
 
         // collision detection with bounds
         // only checks left paddle because both paddles will have the same y position
@@ -160,11 +148,9 @@ int main(void)
         // clear the window
         SDL_RenderClear(rend);
 
-        // draw the left paddle to the window
-        SDL_RenderCopy(rend, tex, NULL, &left_pad);
-        SDL_RenderPresent(rend);
-
-        SDL_RenderCopy(rend, tex, NULL, &right_pad);
+        // draw the left and right paddle to the window
+        SDL_RenderCopy(rend, paddle_tex, NULL, &left_pad);
+        SDL_RenderCopy(rend, paddle_tex, NULL, &right_pad);
         SDL_RenderPresent(rend);
 
         // wait 1/60th of a second
@@ -172,8 +158,35 @@ int main(void)
     }
 
     // clean up resources before exiting
-    SDL_DestroyTexture(tex);
+    SDL_DestroyTexture(paddle_tex);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     SDL_Quit();
+}
+
+
+SDL_Texture *make_texture(char *img)
+{
+    /* Creates an SDL_Surface from img, creates texture from surface,
+       checks for errors, and returns the finished texture */
+    SDL_Surface *surface = IMG_Load(img);
+    if (!surface) {
+        printf("error creating paddle_surface\n");
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        return NULL; // not sure if this is the correct return value
+    }
+
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(rend, surface);
+    SDL_FreeSurface(surface);
+    if (!tex) {
+        printf("error creating paddle_texture: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        return NULL;
+    }
+
+    return tex;
 }

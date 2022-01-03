@@ -7,7 +7,7 @@
 #define WINDOW_HEIGHT (480)
 
 // speed in pixels/second
-#define SPEED (200)
+#define SPEED (150)
 
 /* the window and renderer variables are global so other functions can use them without having to pass them as arguments */
 SDL_Window *win;
@@ -71,19 +71,33 @@ int main(void)
     right_pad.y = (int) right_pad_y_pos;
     right_pad.x = (int) right_pad_x_pos;
 
-    // Code for the ball
     SDL_Texture *ball_tex = make_texture("resources/ball.png");
-    SDL_Rect ball;
-    SDL_QueryTexture(ball_tex, NULL, NULL, &ball.w, &ball.h);
-    ball.w /= 10;
-    ball.h /= 10;
-    float ball_x_pos = (float)(WINDOW_WIDTH) / 2;
-    float ball_y_pos = (float)(WINDOW_HEIGHT) / 2;
-    ball.y = (int) ball_y_pos;
-    ball.x = (int) ball_x_pos;
+    
+    // Code for the ball1
+    SDL_Rect ball1;
+    SDL_QueryTexture(ball_tex, NULL, NULL, &ball1.w, &ball1.h);
+    ball1.w /= 10;
+    ball1.h /= 10;
+    float ball1_x_pos = (float)(WINDOW_WIDTH) / 2;
+    float ball1_y_pos = (float)(WINDOW_HEIGHT) / 2;
+    ball1.y = (int) ball1_y_pos;
+    ball1.x = (int) ball1_x_pos;
 
-    float ball_x_vel = SPEED;
-    float ball_y_vel = 100;
+    float ball1_x_vel = SPEED;
+    float ball1_y_vel = 75;
+
+    // Code for ball2
+    SDL_Rect ball2;
+    SDL_QueryTexture(ball_tex, NULL, NULL, &ball2.w, &ball2.h);
+    ball2.w /= 10;
+    ball2.h /= 10;
+    float ball2_x_pos = (float)(WINDOW_WIDTH) / 2;
+    float ball2_y_pos = (float)(WINDOW_HEIGHT) / 2;
+    ball2.y = (int) ball2_y_pos;
+    ball2.x = (int) ball2_x_pos;
+
+    float ball2_x_vel = SPEED;
+    float ball2_y_vel = -100;
 
 
     // initial velocity set to zero
@@ -95,6 +109,9 @@ int main(void)
     bool pad_down = false;
 
     bool close_requested = false;
+
+    // counter is the amount of frames the second ball waits to start moving
+    int counter = 0;
 
     // animation loop
     while (!close_requested) {
@@ -133,48 +150,57 @@ int main(void)
         }
 
 
-/*
-        // collision detection for ball
-        if (ball_x_pos <= 0) {
-            ball_x_pos = 0;
-            ball_x_vel = -ball_x_vel;
+        if (ball1_y_pos <= 0) {
+            ball1_y_pos = 0;
+            ball1_y_vel = -ball1_y_vel;
         }
-        */
-        if (ball_y_pos <= 0) {
-            ball_y_pos = 0;
-            ball_y_vel = -ball_y_vel;
-        }
-        /*
-        if (ball_x_pos >= WINDOW_WIDTH - ball.w) {
-            ball_x_pos = WINDOW_WIDTH - ball.w;
-            ball_x_vel = -ball_x_vel;
-        }
-        */
-        if (ball_y_pos >= WINDOW_HEIGHT - ball.h) {
-            ball_y_pos = WINDOW_HEIGHT - ball.h;
-            ball_y_vel = -ball_y_vel;
+        if (ball1_y_pos >= WINDOW_HEIGHT - ball1.h) {
+            ball1_y_pos = WINDOW_HEIGHT - ball1.h;
+            ball1_y_vel = -ball1_y_vel;
         }
 
-        if (ball_x_pos >= left_pad.x && ball_x_pos <= left_pad.x + left_pad.w && ball_y_pos >= left_pad.y && ball_y_pos <= left_pad.y + left_pad.h) {
-        //    ball_y_vel = -ball_y_vel;
-            ball_x_vel = -ball_x_vel;
+        if (ball1_x_pos >= left_pad.x && ball1_x_pos <= left_pad.x + left_pad.w && ball1_y_pos >= left_pad.y && ball1_y_pos <= left_pad.y + left_pad.h) {
+            ball1_x_vel = -ball1_x_vel;
         }
-        if (ball_x_pos >= right_pad.x && ball_x_pos <= right_pad.x + right_pad.w && ball_y_pos >= right_pad.y && ball_y_pos <= right_pad.y + right_pad.h) {
-        //    ball_y_vel = -ball_y_vel;
-            ball_x_vel = -ball_x_vel;
+        if (ball1_x_pos >= right_pad.x && ball1_x_pos <= right_pad.x + right_pad.w && ball1_y_pos >= right_pad.y && ball1_y_pos <= right_pad.y + right_pad.h) {
+            ball1_x_vel = -ball1_x_vel;
         }
 
-        ball_x_pos += ball_x_vel / 60;
-        ball_y_pos += ball_y_vel / 60;
+        ball1_x_pos += ball1_x_vel / 60;
+        ball1_y_pos += ball1_y_vel / 60;
 
-        ball.x = (int) ball_x_pos;
-        ball.y = (int) ball_y_pos;
+        ball1.x = (int) ball1_x_pos;
+        ball1.y = (int) ball1_y_pos;
+
+        if (counter++ >= 120) {
+            if (ball2_y_pos <= 0) {
+                ball2_y_pos = 0;
+                ball2_y_vel = -ball2_y_vel;
+            }
+            if (ball2_y_pos >= WINDOW_HEIGHT - ball2.h) {
+                ball2_y_pos = WINDOW_HEIGHT - ball2.h;
+                ball2_y_vel = -ball2_y_vel;
+            }
+
+            if (ball2_x_pos >= left_pad.x && ball2_x_pos <= left_pad.x + left_pad.w && ball2_y_pos >= left_pad.y && ball2_y_pos <= left_pad.y + left_pad.h) {
+                ball2_x_vel = -ball2_x_vel;
+            }
+            if (ball2_x_pos >= right_pad.x && ball2_x_pos <= right_pad.x + right_pad.w && ball2_y_pos >= right_pad.y && ball2_y_pos <= right_pad.y + right_pad.h) {
+                ball2_x_vel = -ball2_x_vel;
+            }
+
+            ball2_x_pos += ball2_x_vel / 60;
+            ball2_y_pos += ball2_y_vel / 60;
+
+            ball2.x = (int) ball2_x_pos;
+            ball2.y = (int) ball2_y_pos;
+        }
 
 
         // determine velocity of paddles
         pad_x_vel = pad_y_vel = 0;
-        if (pad_up && !pad_down) pad_y_vel = -SPEED;
-        if (pad_down && !pad_up) pad_y_vel = SPEED;
+        if (pad_up && !pad_down) pad_y_vel = -SPEED - 100;
+        if (pad_down && !pad_up) pad_y_vel = SPEED + 100;
 
         // update positions of paddles
         left_pad_x_pos += pad_x_vel / 60;
@@ -205,7 +231,8 @@ int main(void)
         // draw the left and right paddle to the window
         SDL_RenderCopy(rend, paddle_tex, NULL, &left_pad);
         SDL_RenderCopy(rend, paddle_tex, NULL, &right_pad);
-        SDL_RenderCopy(rend, ball_tex, NULL, &ball);
+        SDL_RenderCopy(rend, ball_tex, NULL, &ball1);
+        SDL_RenderCopy(rend, ball_tex, NULL, &ball2);
         SDL_RenderPresent(rend);
 
         // wait 1/60th of a second

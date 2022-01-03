@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
 
+# executable
+game
 # Object files
 *.o
 *.ko

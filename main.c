@@ -82,8 +82,8 @@ int main(void)
     ball.y = (int) ball_y_pos;
     ball.x = (int) ball_x_pos;
 
-    float ball_x_vel = 0;
-    float ball_y_vel = 0;
+    float ball_x_vel = SPEED;
+    float ball_y_vel = SPEED;
 
 
     // initial velocity set to zero
@@ -91,8 +91,8 @@ int main(void)
     float pad_y_vel = 0;
 
     // keep track of which inputs are given
-    bool up = false;
-    bool down = false;
+    bool pad_up = false;
+    bool pad_down = false;
 
     bool close_requested = false;
 
@@ -109,11 +109,11 @@ int main(void)
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_W:
                         case SDL_SCANCODE_UP:
-                            up = true;
+                            pad_up = true;
                             break;
                         case SDL_SCANCODE_S:
                         case SDL_SCANCODE_DOWN:
-                            down = true;
+                            pad_down = true;
                             break;
                     }
                     break;
@@ -121,21 +121,46 @@ int main(void)
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_W:
                         case SDL_SCANCODE_UP:
-                            up = false;
+                            pad_up = false;
                             break;
                         case SDL_SCANCODE_S:
                         case SDL_SCANCODE_DOWN:
-                            down = false;
+                            pad_down = false;
                             break;
                     }
                     break;
             }
         }
 
+        // collision detection for ball
+        if (ball_x_pos <= 0) {
+            ball_x_pos = 0;
+            ball_x_vel = -ball_x_vel;
+        }
+        if (ball_y_pos <= 0) {
+            ball_y_pos = 0;
+            ball_y_vel = -ball_y_vel;
+        }
+        if (ball_x_pos >= WINDOW_WIDTH - ball.w) {
+            ball_x_pos = WINDOW_WIDTH - ball.w;
+            ball_x_vel = -ball_x_vel;
+        }
+        if (ball_y_pos >= WINDOW_HEIGHT - ball.h) {
+            ball_y_pos = WINDOW_HEIGHT - ball.h;
+            ball_y_vel = -ball_y_vel;
+        }
+
+        ball_x_pos += ball_x_vel / 60;
+        ball_y_pos += ball_y_vel / 60;
+
+        ball.x = (int) ball_x_pos;
+        ball.y = (int) ball_y_pos;
+
+
         // determine velocity of paddles
         pad_x_vel = pad_y_vel = 0;
-        if (up && !down) pad_y_vel = -SPEED;
-        if (down && !up) pad_y_vel = SPEED;
+        if (pad_up && !pad_down) pad_y_vel = -SPEED;
+        if (pad_down && !pad_up) pad_y_vel = SPEED;
 
         // update positions of paddles
         left_pad_x_pos += pad_x_vel / 60;

@@ -71,6 +71,21 @@ int main(void)
     right_pad.y = (int) right_pad_y_pos;
     right_pad.x = (int) right_pad_x_pos;
 
+    // Code for the ball
+    SDL_Texture *ball_tex = make_texture("resources/ball.png");
+    SDL_Rect ball;
+    SDL_QueryTexture(ball_tex, NULL, NULL, &ball.w, &ball.h);
+    ball.w /= 10;
+    ball.h /= 10;
+    float ball_x_pos = (float)(WINDOW_WIDTH) / 2;
+    float ball_y_pos = (float)(WINDOW_HEIGHT) / 2;
+    ball.y = (int) ball_y_pos;
+    ball.x = (int) ball_x_pos;
+
+    float ball_x_vel = 0;
+    float ball_y_vel = 0;
+
+
     // initial velocity set to zero
     float pad_x_vel = 0;
     float pad_y_vel = 0;
@@ -117,12 +132,12 @@ int main(void)
             }
         }
 
-        // determine velocity
+        // determine velocity of paddles
         pad_x_vel = pad_y_vel = 0;
         if (up && !down) pad_y_vel = -SPEED;
         if (down && !up) pad_y_vel = SPEED;
 
-        // update positions
+        // update positions of paddles
         left_pad_x_pos += pad_x_vel / 60;
         right_pad_x_pos += pad_x_vel / 60;
         left_pad_y_pos += pad_y_vel / 60;
@@ -139,7 +154,7 @@ int main(void)
             right_pad_y_pos = WINDOW_HEIGHT - right_pad.h;
         }
 
-        // set the positions in the struct
+        // set the positions of paddles in the struct
         left_pad.y = (int) left_pad_y_pos;
         left_pad.x = (int) left_pad_x_pos;
         right_pad.y = (int) right_pad_y_pos;
@@ -151,6 +166,7 @@ int main(void)
         // draw the left and right paddle to the window
         SDL_RenderCopy(rend, paddle_tex, NULL, &left_pad);
         SDL_RenderCopy(rend, paddle_tex, NULL, &right_pad);
+        SDL_RenderCopy(rend, ball_tex, NULL, &ball);
         SDL_RenderPresent(rend);
 
         // wait 1/60th of a second

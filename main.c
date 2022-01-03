@@ -7,7 +7,7 @@
 #define WINDOW_HEIGHT (480)
 
 // speed in pixels/second
-#define SPEED (300)
+#define SPEED (200)
 
 /* the window and renderer variables are global so other functions can use them without having to pass them as arguments */
 SDL_Window *win;
@@ -83,7 +83,7 @@ int main(void)
     ball.x = (int) ball_x_pos;
 
     float ball_x_vel = SPEED;
-    float ball_y_vel = SPEED;
+    float ball_y_vel = 100;
 
 
     // initial velocity set to zero
@@ -132,22 +132,36 @@ int main(void)
             }
         }
 
+
+/*
         // collision detection for ball
         if (ball_x_pos <= 0) {
             ball_x_pos = 0;
             ball_x_vel = -ball_x_vel;
         }
+        */
         if (ball_y_pos <= 0) {
             ball_y_pos = 0;
             ball_y_vel = -ball_y_vel;
         }
+        /*
         if (ball_x_pos >= WINDOW_WIDTH - ball.w) {
             ball_x_pos = WINDOW_WIDTH - ball.w;
             ball_x_vel = -ball_x_vel;
         }
+        */
         if (ball_y_pos >= WINDOW_HEIGHT - ball.h) {
             ball_y_pos = WINDOW_HEIGHT - ball.h;
             ball_y_vel = -ball_y_vel;
+        }
+
+        if (ball_x_pos >= left_pad.x && ball_x_pos <= left_pad.x + left_pad.w && ball_y_pos >= left_pad.y && ball_y_pos <= left_pad.y + left_pad.h) {
+        //    ball_y_vel = -ball_y_vel;
+            ball_x_vel = -ball_x_vel;
+        }
+        if (ball_x_pos >= right_pad.x && ball_x_pos <= right_pad.x + right_pad.w && ball_y_pos >= right_pad.y && ball_y_pos <= right_pad.y + right_pad.h) {
+        //    ball_y_vel = -ball_y_vel;
+            ball_x_vel = -ball_x_vel;
         }
 
         ball_x_pos += ball_x_vel / 60;

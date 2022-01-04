@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #define WINDOW_WIDTH (640)
 #define WINDOW_HEIGHT (480)
@@ -22,6 +24,16 @@ int main(void)
         printf("error initializing SDL: %s\n", SDL_GetError());
         return 1;
     }
+
+    if(TTF_Init()==-1) {
+    printf("TTF_Init: %s\n", TTF_GetError());
+    SDL_Quit();
+    return 1;
+    }
+
+    TTF_Font *font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 15);
+    // color of the text
+    SDL_Color color = {255, 255, 255};
 
     // create a window
     win = SDL_CreateWindow("Pong: Hard Mode!",
@@ -113,6 +125,9 @@ int main(void)
     // counter is the amount of frames the second ball waits to start moving
     int counter = 0;
 
+    long score_int = 0;
+    char score_str[80] = "";
+
     // animation loop
     while (!close_requested) {
         // process events
@@ -159,11 +174,20 @@ int main(void)
             ball1_y_vel = -ball1_y_vel;
         }
 
+        // checks if either ball got past the paddles
+        if (ball1_x_pos <= 0) break;
+        if (ball1_x_pos >= WINDOW_WIDTH) break;
+        if (ball2_x_pos <= 0) break;
+        if (ball2_x_pos >= WINDOW_WIDTH) break;
+
+
         if (ball1_x_pos >= left_pad.x && ball1_x_pos <= left_pad.x + left_pad.w && ball1_y_pos >= left_pad.y && ball1_y_pos <= left_pad.y + left_pad.h) {
             ball1_x_vel = -ball1_x_vel;
+            score_int += 10;
         }
         if (ball1_x_pos >= right_pad.x && ball1_x_pos <= right_pad.x + right_pad.w && ball1_y_pos >= right_pad.y && ball1_y_pos <= right_pad.y + right_pad.h) {
             ball1_x_vel = -ball1_x_vel;
+            score_int += 10;
         }
 
         ball1_x_pos += ball1_x_vel / 60;
@@ -184,9 +208,11 @@ int main(void)
 
             if (ball2_x_pos >= left_pad.x && ball2_x_pos <= left_pad.x + left_pad.w && ball2_y_pos >= left_pad.y && ball2_y_pos <= left_pad.y + left_pad.h) {
                 ball2_x_vel = -ball2_x_vel;
+                score_int += 10;
             }
             if (ball2_x_pos >= right_pad.x && ball2_x_pos <= right_pad.x + right_pad.w && ball2_y_pos >= right_pad.y && ball2_y_pos <= right_pad.y + right_pad.h) {
                 ball2_x_vel = -ball2_x_vel;
+                score_int += 10;
             }
 
             ball2_x_pos += ball2_x_vel / 60;
@@ -219,30 +245,46 @@ int main(void)
             right_pad_y_pos = WINDOW_HEIGHT - right_pad.h;
         }
 
+
         // set the positions of paddles in the struct
         left_pad.y = (int) left_pad_y_pos;
         left_pad.x = (int) left_pad_x_pos;
         right_pad.y = (int) right_pad_y_pos;
         right_pad.x = (int) right_pad_x_pos;
 
+        // Creates surface and texture for scoreboard
+        sprintf(score_str, "%ld", score_int);
+        SDL_Surface *scoreboard_surface = TTF_RenderText_Solid(font, score_str, color);
+        SDL_Texture *scoreboard_texture = SDL_CreateTextureFromSurface(rend, scoreboard_surface);
+        SDL_FreeSurface(scoreboard_surface);
+        int score_h, score_w;
+        SDL_QueryTexture(scoreboard_texture, NULL, NULL, &score_w, &score_h);
+        SDL_Rect score_rect = {0, 0, score_w, score_h};
+
         // clear the window
         SDL_RenderClear(rend);
 
-        // draw the left and right paddle to the window
+
+        // draw all of the textures to the window
         SDL_RenderCopy(rend, paddle_tex, NULL, &left_pad);
         SDL_RenderCopy(rend, paddle_tex, NULL, &right_pad);
         SDL_RenderCopy(rend, ball_tex, NULL, &ball1);
         SDL_RenderCopy(rend, ball_tex, NULL, &ball2);
+        SDL_RenderCopy(rend, scoreboard_texture, NULL, &score_rect);
         SDL_RenderPresent(rend);
 
         // wait 1/60th of a second
         SDL_Delay(1000/60);
+        SDL_DestroyTexture(scoreboard_texture);
     }
 
     // clean up resources before exiting
+    TTF_CloseFont(font);
     SDL_DestroyTexture(paddle_tex);
+    SDL_DestroyTexture(ball_tex);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
+    TTF_Quit();
     SDL_Quit();
 }
 

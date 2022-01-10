@@ -4,3 +4,12 @@ This project is inspired by Pong, implemented in C using the SDL graphics librar
 Similar to Pong, but a single player controls both paddles and there are two balls instead of one. The player gains a point each time they hit a ball and loses when a ball gets past a paddle.
 
 Uses the Fira Code font for score keeping.
+
+### Dependencies and installation
+These are the packages that need to be installed on Debian-based systems. Other distros will have similar packages.
+
+`# apt-get install libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libsdl2-image-dev libsdl2-ttf-2.0-0 libsdl2-ttf-dev`
+
+Invoke the Makefile to build the program in the current directory.
+
+`$ make`

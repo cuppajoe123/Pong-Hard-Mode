@@ -28,11 +28,6 @@ int main(void)
     // font color
     SDL_Color color = {255, 255, 255};
 
-    struct position {
-        int x;
-        int y;
-    };
-
     SDL_Texture *paddle_tex = make_texture("resources/paddle.png");
     // struct to hold the position and size of both paddle sprites
     SDL_Rect left_pad, right_pad;
@@ -45,46 +40,33 @@ int main(void)
     right_pad.h = left_pad.h;
 
     // start left paddle sprite in the left side of the screen with some space from the window border
-    struct position left_pad_pos, right_pad_pos;
-    left_pad_pos.x = (WINDOW_WIDTH - (WINDOW_WIDTH - 10));
-    left_pad_pos.y = (WINDOW_HEIGHT - left_pad.h) / 2;
-    // set the positions in the struct
-    left_pad.x = left_pad_pos.x;
-    left_pad.y = left_pad_pos.y;
+    left_pad.x = (WINDOW_WIDTH - (WINDOW_WIDTH - 10));
+    left_pad.y = (WINDOW_HEIGHT - left_pad.h) / 2;
 
     // start right paddle sprite on right side of the screen with some space from the window border
-    right_pad_pos.x = (WINDOW_WIDTH - 10);
-    right_pad_pos.y = (WINDOW_HEIGHT - left_pad.h) / 2;
-    // set the positions in the struct
-    right_pad.x = right_pad_pos.x;
-    right_pad.y = right_pad_pos.y;
+    right_pad.x = (WINDOW_WIDTH - 10);
+    right_pad.y = (WINDOW_HEIGHT - left_pad.h) / 2;
 
     SDL_Texture *ball_tex = make_texture("resources/ball.png");
     
     // Code for the ball1
     SDL_Rect ball1;
-    struct position ball1_pos;
     SDL_QueryTexture(ball_tex, NULL, NULL, &ball1.w, &ball1.h);
     ball1.w /= 10;
     ball1.h /= 10;
-    ball1_pos.x = (WINDOW_WIDTH) / 2;
-    ball1_pos.y = (WINDOW_HEIGHT) / 2;
-    ball1.x = ball1_pos.x;
-    ball1.y = ball1_pos.y;
+    ball1.x = (WINDOW_WIDTH) / 2;
+    ball1.y = (WINDOW_HEIGHT) / 2;
 
     int ball1_x_vel = SPEED;
     int ball1_y_vel = 75;
 
     // Code for ball2
     SDL_Rect ball2;
-    struct position ball2_pos;
     SDL_QueryTexture(ball_tex, NULL, NULL, &ball2.w, &ball2.h);
     ball2.w /= 10;
     ball2.h /= 10;
-    ball2_pos.x = (WINDOW_WIDTH) / 2;
-    ball2_pos.y = (WINDOW_HEIGHT) / 2;
-    ball2.x = ball2_pos.x;
-    ball2.y = ball2_pos.y;
+    ball2.x = (WINDOW_WIDTH) / 2;
+    ball2.y = (WINDOW_HEIGHT) / 2;
 
     int ball2_x_vel = SPEED;
     int ball2_y_vel = -100;
@@ -143,61 +125,56 @@ int main(void)
         }
 
 
-        if (ball1_pos.y <= 0) {
-            ball1_pos.y = 0;
+        if (ball1.y <= 0) {
+            ball1.y = 0;
             ball1_y_vel = -ball1_y_vel;
         }
-        if (ball1_pos.y >= WINDOW_HEIGHT - ball1.h) {
-            ball1_pos.y = WINDOW_HEIGHT - ball1.h;
+        if (ball1.y >= WINDOW_HEIGHT - ball1.h) {
+            ball1.y = WINDOW_HEIGHT - ball1.h;
             ball1_y_vel = -ball1_y_vel;
         }
 
         // checks if either ball got past the paddles
-        if (ball1_pos.x <= 0) break;
-        if (ball1_pos.x >= WINDOW_WIDTH) break;
-        if (ball2_pos.x <= 0) break;
-        if (ball2_pos.x >= WINDOW_WIDTH) break;
+        if (ball1.x <= 0) break;
+        if (ball1.x >= WINDOW_WIDTH) break;
+        if (ball2.x <= 0) break;
+        if (ball2.x >= WINDOW_WIDTH) break;
 
 
-        if (ball1_pos.x >= left_pad.x && ball1_pos.x <= left_pad.x + left_pad.w && ball1_pos.y >= left_pad.y && ball1_pos.y <= left_pad.y + left_pad.h) {
+        if (ball1.x >= left_pad.x && ball1.x <= left_pad.x + left_pad.w && ball1.y >= left_pad.y && ball1.y <= left_pad.y + left_pad.h) {
             ball1_x_vel = -ball1_x_vel;
             score_int += 10;
         }
-        if (ball1_pos.x >= right_pad.x && ball1_pos.x <= right_pad.x + right_pad.w && ball1_pos.y >= right_pad.y && ball1_pos.y <= right_pad.y + right_pad.h) {
+        if (ball1.x >= right_pad.x && ball1.x <= right_pad.x + right_pad.w && ball1.y >= right_pad.y && ball1.y <= right_pad.y + right_pad.h) {
             ball1_x_vel = -ball1_x_vel;
             score_int += 10;
         }
 
-        ball1_pos.x += ball1_x_vel / 60;
-        ball1_pos.y += ball1_y_vel / 60;
+        ball1.x += ball1_x_vel / 60;
+        ball1.y += ball1_y_vel / 60;
 
-        ball1.x = (int) ball1_pos.x;
-        ball1.y = (int) ball1_pos.y;
 
         if (counter++ >= 120) {
-            if (ball2_pos.y <= 0) {
-                ball2_pos.y = 0;
+            if (ball2.y <= 0) {
+                ball2.y = 0;
                 ball2_y_vel = -ball2_y_vel;
             }
-            if (ball2_pos.y >= WINDOW_HEIGHT - ball2.h) {
-                ball2_pos.y = WINDOW_HEIGHT - ball2.h;
+            if (ball2.y >= WINDOW_HEIGHT - ball2.h) {
+                ball2.y = WINDOW_HEIGHT - ball2.h;
                 ball2_y_vel = -ball2_y_vel;
             }
 
-            if (ball2_pos.x >= left_pad.x && ball2_pos.x <= left_pad.x + left_pad.w && ball2_pos.y >= left_pad.y && ball2_pos.y <= left_pad.y + left_pad.h) {
+            if (ball2.x >= left_pad.x && ball2.x <= left_pad.x + left_pad.w && ball2.y >= left_pad.y && ball2.y <= left_pad.y + left_pad.h) {
                 ball2_x_vel = -ball2_x_vel;
                 score_int += 10;
             }
-            if (ball2_pos.x >= right_pad.x && ball2_pos.x <= right_pad.x + right_pad.w && ball2_pos.y >= right_pad.y && ball2_pos.y <= right_pad.y + right_pad.h) {
+            if (ball2.x >= right_pad.x && ball2.x <= right_pad.x + right_pad.w && ball2.y >= right_pad.y && ball2.y <= right_pad.y + right_pad.h) {
                 ball2_x_vel = -ball2_x_vel;
                 score_int += 10;
             }
 
-            ball2_pos.x += ball2_x_vel / 60;
-            ball2_pos.y += ball2_y_vel / 60;
-
-            ball2.x = (int) ball2_pos.x;
-            ball2.y = (int) ball2_pos.y;
+            ball2.x += ball2_x_vel / 60;
+            ball2.y += ball2_y_vel / 60;
         }
 
 
@@ -207,28 +184,22 @@ int main(void)
         if (pad_down && !pad_up) pad_y_vel = SPEED + 100;
 
         // update positions of paddles
-        left_pad_pos.x += pad_x_vel / 60;
-        right_pad_pos.x += pad_x_vel / 60;
-        left_pad_pos.y += pad_y_vel / 60;
-        right_pad_pos.y += pad_y_vel / 60;
+        left_pad.x += pad_x_vel / 60;
+        right_pad.x += pad_x_vel / 60;
+        left_pad.y += pad_y_vel / 60;
+        right_pad.y += pad_y_vel / 60;
 
         // collision detection with bounds
         // only checks left paddle because both paddles will have the same y position
-        if (left_pad_pos.y <= 0) {
-            left_pad_pos.y = 0;
-            right_pad_pos.y = 0;
+        if (left_pad.y <= 0) {
+            left_pad.y = 0;
+            right_pad.y = 0;
         }
-        if (left_pad_pos.y >= WINDOW_HEIGHT - left_pad.h) {
-            left_pad_pos.y = WINDOW_HEIGHT - left_pad.h;
-            right_pad_pos.y = WINDOW_HEIGHT - right_pad.h;
+        if (left_pad.y >= WINDOW_HEIGHT - left_pad.h) {
+            left_pad.y = WINDOW_HEIGHT - left_pad.h;
+            right_pad.y = WINDOW_HEIGHT - right_pad.h;
         }
 
-
-        // set the positions of paddles in the struct
-        left_pad.y = (int) left_pad_pos.y;
-        left_pad.x = (int) left_pad_pos.x;
-        right_pad.y = (int) right_pad_pos.y;
-        right_pad.x = (int) right_pad_pos.x;
 
         // Creates surface and texture for scoreboard
         sprintf(score_str, "%ld", score_int);

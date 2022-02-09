@@ -14,12 +14,20 @@
 /* the window and renderer variables are global so other functions can use them without having to pass them as arguments */
 SDL_Window *win;
 SDL_Renderer *rend;
+TTF_Font *font;
 
+/* function prototypes */
 SDL_Texture *make_texture(char *img);
+int init_graphics(void);
 
 int main(void)
 {
-    // attempt to initialize graphics system
+    init_graphics();
+    // font color
+    SDL_Color color = {255, 255, 255};
+
+    /*
+    // attempt to initialize graphics and font system
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
         return 1;
@@ -32,7 +40,6 @@ int main(void)
     }
 
     TTF_Font *font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 15);
-    // color of the text
     SDL_Color color = {255, 255, 255};
 
     // create a window
@@ -55,6 +62,7 @@ int main(void)
         SDL_Quit();
         return 1;
     }
+    */
 
     SDL_Texture *paddle_tex = make_texture("resources/paddle.png");
 
@@ -313,4 +321,44 @@ SDL_Texture *make_texture(char *img)
     }
 
     return tex;
+}
+
+int init_graphics(void)
+{
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        printf("error initializing SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    if(TTF_Init()==-1) {
+    printf("TTF_Init: %s\n", TTF_GetError());
+    SDL_Quit();
+    return 1;
+    }
+
+    font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 15);
+    SDL_Color color = {255, 255, 255};
+
+    // create a window
+    win = SDL_CreateWindow("Pong: Hard Mode!",
+                                        SDL_WINDOWPOS_CENTERED,
+                                        SDL_WINDOWPOS_CENTERED,
+                                        WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    if (!win) {
+        printf("error creating window: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    // create a renderer
+    Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+    rend = SDL_CreateRenderer(win, -1, render_flags);
+    if (!rend) {
+        printf("error creating renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        return 1;
+    }
+
+    return 0;
 }

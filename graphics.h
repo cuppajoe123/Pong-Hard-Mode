@@ -19,7 +19,8 @@ extern TTF_Font *font;
 SDL_Texture *make_texture_img(char *img);
 SDL_Texture *make_texture_str(char *str);
 int init_graphics(void);
-SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, int scale, int args);
+SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args);
 void start_screen(void);
+void username_screen(void);
 
 #endif

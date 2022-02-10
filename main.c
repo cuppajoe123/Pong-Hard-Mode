@@ -73,6 +73,7 @@ int main(void)
 
     // start screen loop
     start_screen();
+    username_screen();
 
     // animation loop
     while (!close_requested) {

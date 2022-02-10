@@ -11,7 +11,7 @@ int main(void)
     // font color
     SDL_Color color = {255, 255, 255};
 
-    SDL_Texture *paddle_tex = make_texture("resources/paddle.png");
+    SDL_Texture *paddle_tex = make_texture_img("resources/paddle.png");
     // struct to hold the position and size of both paddle sprites
     SDL_Rect left_pad, right_pad;
 
@@ -30,7 +30,7 @@ int main(void)
     right_pad.x = (WINDOW_WIDTH - 10);
     right_pad.y = (WINDOW_HEIGHT - left_pad.h) / 2;
 
-    SDL_Texture *ball_tex = make_texture("resources/ball.png");
+    SDL_Texture *ball_tex = make_texture_img("resources/ball.png");
     
     // Code for the ball1
     SDL_Rect ball1;
@@ -70,6 +70,9 @@ int main(void)
 
     long score_int = 0;
     char score_str[80] = "";
+
+    // start screen loop
+    start_screen();
 
     // animation loop
     while (!close_requested) {

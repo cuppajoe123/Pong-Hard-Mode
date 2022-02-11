@@ -9,7 +9,8 @@
 #define WINDOW_HEIGHT (480)
 // speed in pixels/second
 #define SPEED (150)
-#define CENTERED 0x01
+#define CENTERED_X 0x01
+#define CENTERED_Y 0x02
 
 
 extern SDL_Window *win;

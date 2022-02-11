@@ -21,7 +21,7 @@ int init_graphics(void)
     return 1;
     }
 
-    font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 18);
+    font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 20);
 
     // create a window
     win = SDL_CreateWindow("Pong: Hard Mode!",
@@ -76,7 +76,8 @@ SDL_Texture *make_texture_img(char *img)
 SDL_Texture *make_texture_str(char *str)
 {
     SDL_Color color = {255, 255, 255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, str, color);
+
+    SDL_Surface *surface = TTF_RenderText_Blended(font, str, color);
     if (!surface) {
         if (strcmp(str, "") == 0) {
             return NULL;
@@ -113,6 +114,14 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
         rect.x = (WINDOW_WIDTH / 2) - (rect.w / 2);
         rect.y = y;
         return rect;
+    } else if ((args ^ 0x02) == 0) {
+        rect.x = x;
+        rect.y = (WINDOW_HEIGHT / 2) - (rect.h / 2);
+        return rect;
+    } else if ((args ^ 0x03) == 0) {
+        rect.x = (WINDOW_WIDTH / 2) - (rect.w / 2);
+        rect.y = (WINDOW_HEIGHT / 2) - (rect.h / 2);
+        return rect;
     }
 
     rect.x = x;
@@ -125,10 +134,10 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
 void start_screen(void)
 {
     SDL_Texture *title_texture = make_texture_str("Pong: Hard Mode");
-    SDL_Rect title_rect = make_textbox(title_texture, 0, WINDOW_HEIGHT / 2, 2, CENTERED);
+    SDL_Rect title_rect = make_textbox(title_texture, 0, WINDOW_HEIGHT / 2, 2, CENTERED_X | CENTERED_Y);
 
     SDL_Texture *prompt_texture = make_texture_str("Press ENTER to start");
-    SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 1.5, 1, CENTERED);
+    SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 1.5, 1, CENTERED_X);
 
     bool close_requested = false;
     while (!close_requested) {
@@ -162,7 +171,7 @@ void start_screen(void)
 void username_screen(void)
 {
     SDL_Texture *prompt_texture= make_texture_str("Enter a username");
-    SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED);
+    SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
 
     char username[15] = "";
     SDL_StartTextInput();
@@ -191,7 +200,7 @@ void username_screen(void)
             }
         }
         SDL_Texture *username_texture = make_texture_str(username);
-        SDL_Rect username_rect = make_textbox(username_texture, 0, WINDOW_HEIGHT / 2, 1.5, CENTERED);
+        SDL_Rect username_rect = make_textbox(username_texture, 0, WINDOW_HEIGHT / 2, 1.5, CENTERED_X);
         SDL_RenderClear(rend);
         SDL_RenderCopy(rend, prompt_texture, NULL, &prompt_rect);
         SDL_RenderCopy(rend, username_texture, NULL, &username_rect);

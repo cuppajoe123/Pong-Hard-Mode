@@ -8,8 +8,6 @@ int main(void)
     /* IMPORTANT: try getting rid of position structs */
 
     init_graphics();
-    // font color
-    SDL_Color color = {255, 255, 255};
 
     SDL_Texture *paddle_tex = make_texture_img("resources/paddle.png");
     // struct to hold the position and size of both paddle sprites
@@ -190,12 +188,8 @@ int main(void)
 
         // Creates surface and texture for scoreboard
         sprintf(score_str, "%ld", score_int);
-        SDL_Surface *scoreboard_surface = TTF_RenderText_Solid(font, score_str, color);
-        SDL_Texture *scoreboard_texture = SDL_CreateTextureFromSurface(rend, scoreboard_surface);
-        SDL_FreeSurface(scoreboard_surface);
-        int score_h, score_w;
-        SDL_QueryTexture(scoreboard_texture, NULL, NULL, &score_w, &score_h);
-        SDL_Rect score_rect = {0, 0, score_w, score_h};
+        SDL_Texture *scoreboard_texture = make_texture_str(score_str);
+        SDL_Rect score_rect = make_textbox(scoreboard_texture, 0, 0, 1, 0x0);
 
         // clear the window
         SDL_RenderClear(rend);

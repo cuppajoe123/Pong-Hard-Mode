@@ -168,12 +168,12 @@ void start_screen(void)
     SDL_DestroyTexture(prompt_texture);
 }
 
-void username_screen(void)
+void username_screen(char *username)
 {
+    /* must pass in a char array for the username to avoid conflicts */
     SDL_Texture *prompt_texture= make_texture_str("Enter a username");
     SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
 
-    char username[15] = "";
     SDL_StartTextInput();
     bool close_requested = false;
     while (!close_requested) {

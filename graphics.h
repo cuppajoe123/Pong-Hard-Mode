@@ -22,6 +22,6 @@ SDL_Texture *make_texture_str(char *str);
 int init_graphics(void);
 SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args);
 void start_screen(void);
-void username_screen(void);
+void username_screen(char *username);
 
 #endif

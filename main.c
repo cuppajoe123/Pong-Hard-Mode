@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "graphics.h"
+#include "leaderboard.h"
 
 int main(void)
 {
@@ -71,7 +72,8 @@ int main(void)
 
     // start screen loop
     start_screen();
-    username_screen();
+    char username[15] = "";
+    username_screen(username);
 
     // animation loop
     while (!close_requested) {
@@ -207,6 +209,8 @@ int main(void)
         SDL_Delay(1000/60);
         SDL_DestroyTexture(scoreboard_texture);
     }
+
+    save_user_data(score_str, username);
 
     // clean up resources before exiting
     TTF_CloseFont(font);

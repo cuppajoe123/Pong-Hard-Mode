@@ -132,7 +132,7 @@ int main(void)
             ball1_x_vel = -ball1_x_vel;
             score_int += 10;
         }
-        if (ball1.x >= right_pad.x && ball1.x <= right_pad.x + right_pad.w && ball1.y >= right_pad.y && ball1.y <= right_pad.y + right_pad.h) {
+        if (ball1.x + ball1.w >= right_pad.x && ball1.x + ball1.w <= right_pad.x + right_pad.w && ball1.y >= right_pad.y && ball1.y <= right_pad.y + right_pad.h) {
             ball1_x_vel = -ball1_x_vel;
             score_int += 10;
         }
@@ -155,7 +155,7 @@ int main(void)
                 ball2_x_vel = -ball2_x_vel;
                 score_int += 10;
             }
-            if (ball2.x >= right_pad.x && ball2.x <= right_pad.x + right_pad.w && ball2.y >= right_pad.y && ball2.y <= right_pad.y + right_pad.h) {
+            if (ball2.x + ball2.w >= right_pad.x && ball2.x + ball2.w <= right_pad.x + right_pad.w && ball2.y >= right_pad.y && ball2.y <= right_pad.y + right_pad.h) {
                 ball2_x_vel = -ball2_x_vel;
                 score_int += 10;
             }

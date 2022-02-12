@@ -16,43 +16,76 @@ int save_user_data(char *score, char *username)
     return 0;
 }
 
-int linecount(FILE *fp)
+static int linecount(char *path)
 {
+    FILE *fp = fopen(path, "r");
+
+    if (fp == NULL) {
+        printf("Error: file pointer is null.\n");
+        exit(1);
+    }
+
     int count = 0;
     for (char c = getc(fp); c != EOF; c = getc(fp)) {
         if (c == '\n')
             count++;
     }
+    fclose(fp);
     return count;
 }
 
 
-char **read_user_data(char *path)
+char **read_user_data(char *path, int *num_lines)
 {
+    /* reads each line of path into a char *array, and stores length of path in num_lines to be used later */
     FILE *fp = fopen(path, "r");
     if (fp == NULL) {
         printf("Error: file pointer is null.\n");
         exit(1);
     }
 
-    int num_lines = linecount(fp);
+    *num_lines = linecount(path);
     size_t len = 80;
-    char **users = malloc(num_lines * sizeof(char *));
-    if (users == NULL) {
+    char **user_data = malloc(*num_lines * sizeof(char *));
+    if (user_data == NULL) {
         printf("Allocation error: malloc\n");
         exit(1);
     }
-    for (int i = 0; i < num_lines; i++) {
-        users[i] = malloc(80 * sizeof(char));
-        if (users[i] == NULL) {
+    for (int i = 0; i < *num_lines; i++) {
+        user_data[i] = malloc(80 * sizeof(char));
+        if (user_data[i] == NULL) {
             printf("Allocation error: malloc\n");
             exit(1);
         }
     }
-    fseek(fp, 0, SEEK_SET);
 
-    for (int i = 0; i < num_lines; i++)
-        getline(&users[i], &len, fp);
+    for (int i = 0; i < *num_lines; i++)
+        getline(&user_data[i], &len, fp);
 
-    return users;
+    fclose(fp);
+
+    return user_data;
+}
+
+static int cmpscore(const void *p1, const void *p2)
+{
+    int score1, score2;
+    sscanf(*(char **)p1, "%d", &score1);
+    sscanf(*(char **)p2, "%d", &score2);
+    if (score1 == score2)
+        return 0;
+    if (score1 < score2)
+        return -1;
+    else
+        return 1;
+}
+
+char **sort_user_data(char **user_data, int num_lines)
+{
+    /* uses sscanf to parse out scores and then rearranges strings based on that */
+    /* get num_lines from previous read_user_data */
+    int length = num_lines;
+    qsort(user_data, length, sizeof(char *), cmpscore);
+
+    return user_data;
 }

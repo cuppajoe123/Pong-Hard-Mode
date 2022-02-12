@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "graphics.h"
+#include "leaderboard.h"
 
 
 SDL_Window *win;

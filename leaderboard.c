@@ -15,3 +15,44 @@ int save_user_data(char *score, char *username)
 
     return 0;
 }
+
+int linecount(FILE *fp)
+{
+    int count = 0;
+    for (char c = getc(fp); c != EOF; c = getc(fp)) {
+        if (c == '\n')
+            count++;
+    }
+    return count;
+}
+
+
+char **read_user_data(char *path)
+{
+    FILE *fp = fopen(path, "r");
+    if (fp == NULL) {
+        printf("Error: file pointer is null.\n");
+        exit(1);
+    }
+
+    int num_lines = linecount(fp);
+    size_t len = 80;
+    char **users = malloc(num_lines * sizeof(char *));
+    if (users == NULL) {
+        printf("Allocation error: malloc\n");
+        exit(1);
+    }
+    for (int i = 0; i < num_lines; i++) {
+        users[i] = malloc(80 * sizeof(char));
+        if (users[i] == NULL) {
+            printf("Allocation error: malloc\n");
+            exit(1);
+        }
+    }
+    fseek(fp, 0, SEEK_SET);
+
+    for (int i = 0; i < num_lines; i++)
+        getline(&users[i], &len, fp);
+
+    return users;
+}

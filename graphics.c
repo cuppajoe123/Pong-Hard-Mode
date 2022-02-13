@@ -212,3 +212,64 @@ void username_screen(char *username)
     SDL_StopTextInput();
     SDL_DestroyTexture(prompt_texture);
 }
+
+void leaderboard_screen(void)
+{
+    int num_lines;
+    char **user_data = read_user_data("resources/data.txt", &num_lines);
+    user_data = sort_user_data(user_data, num_lines);
+    /* now that they are sorted, the strings can be concatenated */
+    /* first, find number of characters to allocate to the string. */
+    int num_chars = 0;
+    for (int i = 0; i < num_lines && i < 16; i++)
+        num_chars += strlen(user_data[i]);
+    char *leaderboard_text = malloc(num_chars * sizeof(char));
+    if (leaderboard_text == NULL) {
+        printf("malloc of leaderboard_text failed!\n");
+        exit(1);
+    }
+    leaderboard_text = user_data[0];
+    for (int i = 1; i < num_lines && i < 16; i++)
+        strcat(leaderboard_text, user_data[i]);
+
+    SDL_Color color = {255, 255, 255};
+
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, leaderboard_text, color, WINDOW_WIDTH / 4);
+    if (!surface) {
+        printf("error creating leaderboard surface\n");
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+    }
+
+    SDL_Texture *leaderboard_texture = SDL_CreateTextureFromSurface(rend, surface);
+    SDL_FreeSurface(surface);
+
+    SDL_Rect leaderboard_rect = make_textbox(leaderboard_texture, 0, WINDOW_HEIGHT/8, 1, CENTERED_X);
+
+    bool close_requested = false;
+    while (!close_requested) {
+        // process events
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    close_requested = true;
+                    break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.scancode) {
+                        case SDL_SCANCODE_RETURN:
+                            close_requested = true;
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        SDL_RenderClear(rend);
+        SDL_RenderCopy(rend, leaderboard_texture, NULL, &leaderboard_rect);
+        SDL_RenderPresent(rend);
+        SDL_Delay(1000/60);
+    }
+    SDL_DestroyTexture(leaderboard_texture);
+}

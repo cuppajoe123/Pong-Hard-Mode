@@ -75,9 +75,9 @@ static int cmpscore(const void *p1, const void *p2)
     if (score1 == score2)
         return 0;
     if (score1 < score2)
-        return -1;
-    else
         return 1;
+    else
+        return -1;
 }
 
 char **sort_user_data(char **user_data, int num_lines)

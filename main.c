@@ -71,6 +71,7 @@ int main(void)
     char score_str[80] = "";
 
     // start screen loop
+    leaderboard_screen();
     start_screen();
     char username[15] = "";
     username_screen(username);

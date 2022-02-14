@@ -217,6 +217,10 @@ int username_screen(char *username)
 
 int leaderboard_screen(void)
 {
+    /* render heading */
+    SDL_Texture *heading_texture = make_texture_str("Leaderboard");
+    SDL_Rect heading_rect = make_textbox(heading_texture, 0, 10, 2, CENTERED_X);
+
     int num_lines;
     char **user_data = read_user_data("resources/data.txt", &num_lines);
     user_data = sort_user_data(user_data, num_lines);
@@ -270,9 +274,11 @@ int leaderboard_screen(void)
 
         SDL_RenderClear(rend);
         SDL_RenderCopy(rend, leaderboard_texture, NULL, &leaderboard_rect);
+        SDL_RenderCopy(rend, heading_texture, NULL, &heading_rect);
         SDL_RenderPresent(rend);
         SDL_Delay(1000/60);
     }
     SDL_DestroyTexture(leaderboard_texture);
+    SDL_DestroyTexture(heading_texture);
     return 0;
 }

@@ -71,11 +71,25 @@ int main(void)
     char score_str[80] = "";
 
     // start screen loop
-    leaderboard_screen();
-    start_screen();
+    if (start_screen() == 1) {
+        TTF_CloseFont(font);
+        SDL_DestroyTexture(paddle_tex);
+        SDL_DestroyTexture(ball_tex);
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        TTF_Quit();
+        return 0;
+    }
     char username[15] = "";
-    username_screen(username);
-
+    if (username_screen(username) == 1) {
+        TTF_CloseFont(font);
+        SDL_DestroyTexture(paddle_tex);
+        SDL_DestroyTexture(ball_tex);
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        TTF_Quit();
+        return 0;
+    }
     // animation loop
     while (!close_requested) {
         // process events
@@ -83,8 +97,14 @@ int main(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    close_requested = true;
-                    break;
+                    TTF_CloseFont(font);
+                    SDL_DestroyTexture(paddle_tex);
+                    SDL_DestroyTexture(ball_tex);
+                    SDL_DestroyRenderer(rend);
+                    SDL_DestroyWindow(win);
+                    TTF_Quit();
+                    SDL_Quit();
+                    return 0;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_W:
@@ -212,6 +232,16 @@ int main(void)
     }
 
     save_user_data(score_str, username);
+    if (leaderboard_screen() == 1) {
+        TTF_CloseFont(font);
+        SDL_DestroyTexture(paddle_tex);
+        SDL_DestroyTexture(ball_tex);
+        SDL_DestroyRenderer(rend);
+        SDL_DestroyWindow(win);
+        TTF_Quit();
+        SDL_Quit();
+        return 0;
+    }
 
     // clean up resources before exiting
     TTF_CloseFont(font);

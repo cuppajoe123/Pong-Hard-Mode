@@ -132,7 +132,7 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
     return rect;
 }
 
-void start_screen(void)
+int start_screen(void)
 {
     SDL_Texture *title_texture = make_texture_str("Pong: Hard Mode");
     SDL_Rect title_rect = make_textbox(title_texture, 0, WINDOW_HEIGHT / 2, 2, CENTERED_X | CENTERED_Y);
@@ -147,8 +147,8 @@ void start_screen(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    close_requested = true;
-                    break;
+                    /* returning 1 causes program to shut down */
+                    return 1;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
@@ -167,9 +167,10 @@ void start_screen(void)
     }
     SDL_DestroyTexture(title_texture);
     SDL_DestroyTexture(prompt_texture);
+    return 0;
 }
 
-void username_screen(char *username)
+int username_screen(char *username)
 {
     /* must pass in a char array for the username to avoid conflicts */
     SDL_Texture *prompt_texture= make_texture_str("Enter a username");
@@ -183,8 +184,8 @@ void username_screen(char *username)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    close_requested = true;
-                    break;
+                    /* returning 1 causes program to shut down */
+                    return 1;
                 case SDL_KEYDOWN:
                     if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(username) > 0) {
                         username[strlen(username)-1] = '\0';
@@ -211,9 +212,10 @@ void username_screen(char *username)
     }
     SDL_StopTextInput();
     SDL_DestroyTexture(prompt_texture);
+    return 0;
 }
 
-void leaderboard_screen(void)
+int leaderboard_screen(void)
 {
     int num_lines;
     char **user_data = read_user_data("resources/data.txt", &num_lines);
@@ -254,8 +256,8 @@ void leaderboard_screen(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    close_requested = true;
-                    break;
+                    /* if the function returns 1, the entire program will shut down */
+                    return 1;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
@@ -272,4 +274,5 @@ void leaderboard_screen(void)
         SDL_Delay(1000/60);
     }
     SDL_DestroyTexture(leaderboard_texture);
+    return 0;
 }

@@ -13,6 +13,7 @@ int save_user_data(char *score, char *username)
     if (fwrite(score, sizeof(char), strlen(score), fp) != strlen(score))
         printf("Error writing to file\n");
 
+    fclose(fp);
     return 0;
 }
 

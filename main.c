@@ -232,6 +232,7 @@ int main(void)
     }
 
     save_user_data(score_str, username);
+
     if (leaderboard_screen() == 1) {
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);

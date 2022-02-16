@@ -1,6 +1,7 @@
 #include "graphics.h"
 #include "leaderboard.h"
 
+/* save_user_data: concatenates score and username, then appends to the data file */
 int save_user_data(char *score, char *username)
 {
     /* concatenates a space and then the username, then a newline to score. Score will then contain the entire leaderboard entry for that user */
@@ -17,6 +18,7 @@ int save_user_data(char *score, char *username)
     return 0;
 }
 
+/* linecount: counts number of entries in the data file */
 static int linecount(char *path)
 {
     FILE *fp = fopen(path, "r");
@@ -36,6 +38,7 @@ static int linecount(char *path)
 }
 
 
+/* read_user_data: allocates an array of character pointers and allocates space for each string. Then each line of the file is read into a string, to then be returned. */
 char **read_user_data(char *path, int *num_lines)
 {
     /* reads each line of path into a char *array, and stores length of path in num_lines to be used later */
@@ -68,6 +71,7 @@ char **read_user_data(char *path, int *num_lines)
     return user_data;
 }
 
+/* cmpscore: comparison function for qsort. Parses out the score from strings p1 and p2, then compares them. */
 static int cmpscore(const void *p1, const void *p2)
 {
     int score1, score2;
@@ -81,6 +85,7 @@ static int cmpscore(const void *p1, const void *p2)
         return -1;
 }
 
+/* sort_user_data: runs qsort on array of strings, then returns the sorted array */
 char **sort_user_data(char **user_data, int num_lines)
 {
     /* uses sscanf to parse out scores and then rearranges strings based on that */

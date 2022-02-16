@@ -80,6 +80,7 @@ int main(void)
         TTF_Quit();
         return 0;
     }
+    // start username_screen
     char username[15] = "";
     if (username_screen(username) == 1) {
         TTF_CloseFont(font);
@@ -90,7 +91,7 @@ int main(void)
         TTF_Quit();
         return 0;
     }
-    // animation loop
+    // main game loop
     while (!close_requested) {
         // process events
         SDL_Event event;
@@ -133,6 +134,7 @@ int main(void)
         }
 
 
+        // checks if ball should bounce off top or bottom of screen
         if (ball1.y <= 0) {
             ball1.y = 0;
             ball1_y_vel = -ball1_y_vel;
@@ -149,6 +151,7 @@ int main(void)
         if (ball2.x >= WINDOW_WIDTH) break;
 
 
+        // collision detection for paddles
         if (ball1.x >= left_pad.x && ball1.x <= left_pad.x + left_pad.w && ball1.y >= left_pad.y && ball1.y <= left_pad.y + left_pad.h) {
             ball1_x_vel = -ball1_x_vel;
             score_int += 10;
@@ -163,6 +166,7 @@ int main(void)
 
 
         if (counter++ >= 120) {
+            // same code as for ball1 
             if (ball2.y <= 0) {
                 ball2.y = 0;
                 ball2_y_vel = -ball2_y_vel;

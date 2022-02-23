@@ -5,10 +5,12 @@
 #include "leaderboard.h"
 
 
+/* window, renderer, and font are global so every function can access them without having to pass them in */
 SDL_Window *win;
 SDL_Renderer *rend;
 TTF_Font *font;
 
+/* init_graphics: initializes SDL, font, window, and renderer with checks for errors */
 int init_graphics(void)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -48,6 +50,7 @@ int init_graphics(void)
     return 0;
 }
 
+/* make_texture_img: creates a texture from a path to an image */
 SDL_Texture *make_texture_img(char *img)
 {
     /* Creates an SDL_Surface from img, creates texture from surface,
@@ -74,6 +77,7 @@ SDL_Texture *make_texture_img(char *img)
     return tex;
 }
 
+/* make_texture: creates a texture from a string */
 SDL_Texture *make_texture_str(char *str)
 {
     SDL_Color color = {255, 255, 255};
@@ -105,6 +109,7 @@ SDL_Texture *make_texture_str(char *str)
 
 
 
+/* make_textbox: returns an SDL_Rect with the supplied characteristics. Optional args are available for a centered textbox */
 SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
 {
     SDL_Rect rect;
@@ -132,6 +137,7 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
     return rect;
 }
 
+/* start_screen: main animation loop for rendering the start screen. When the player hits enter, the function returns, and the next screen can be rendered */
 int start_screen(void)
 {
     SDL_Texture *title_texture = make_texture_str("Pong: Hard Mode");
@@ -170,6 +176,7 @@ int start_screen(void)
     return 0;
 }
 
+/* username_screen: prompts the user for a name to later write. The text is updated when the user adds characters or deletes characters. Pressing enter confirms their username choice and returns */
 int username_screen(char *username)
 {
     /* must pass in a char array for the username to avoid conflicts */
@@ -215,6 +222,7 @@ int username_screen(char *username)
     return 0;
 }
 
+/* leaderboard_screen: reads all user data from the file as an array of strings, sorts the strings based on their score, concatenates each string, then renders it to the screen */
 int leaderboard_screen(void)
 {
     /* render heading */

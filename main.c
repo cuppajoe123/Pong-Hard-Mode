@@ -1,3 +1,10 @@
+/*
+ * This program was written using the SDL2 graphics library. All functions and data types beginning in SDL* are from the graphics library:
+ * https://github.com/libsdl-org/SDL
+ *
+ * The font used for the user interface is Fira Code: https://github.com/tonsky/FiraCode
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

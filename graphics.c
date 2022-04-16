@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "graphics.h"
-#include "leaderboard.h"
+#include "leader_board.h"
 
 
 /* window, renderer, and font are global so every function can access them without having to pass them in */
@@ -196,13 +196,11 @@ int username_screen(char *username)
                 case SDL_KEYDOWN:
                     if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(username) > 0) {
                         username[strlen(username)-1] = '\0';
-                        printf("Deleted character: username is now %s\n", username);
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_RETURN)
                         close_requested = true;
                     break;
                 case SDL_TEXTINPUT:
-                    printf("Got character: %s\n", event.text.text);
                     if (strlen(username) + strlen(event.text.text) < 15)
                         strncat(username, event.text.text, 15);
                     break;
@@ -222,8 +220,8 @@ int username_screen(char *username)
     return 0;
 }
 
-/* leaderboard_screen: reads all user data from the file as an array of strings, sorts the strings based on their score, concatenates each string, then renders it to the screen */
-int leaderboard_screen(void)
+/* leader_board_screen: reads all user data from the file as an array of strings, sorts the strings based on their score, concatenates each string, then renders it to the screen */
+int leader_board_screen(void)
 {
     /* render heading */
     SDL_Texture *heading_texture = make_texture_str("Leaderboard");
@@ -237,29 +235,29 @@ int leaderboard_screen(void)
     int num_chars = 0;
     for (int i = 0; i < num_lines && i < 16; i++)
         num_chars += strlen(user_data[i]);
-    char *leaderboard_text = malloc(num_chars * sizeof(char));
-    if (leaderboard_text == NULL) {
-        printf("malloc of leaderboard_text failed!\n");
+    char *leader_board_text = malloc(num_chars * sizeof(char));
+    if (leader_board_text == NULL) {
+        printf("malloc of leader_board_text failed!\n");
         exit(1);
     }
-    leaderboard_text = user_data[0];
+    leader_board_text = user_data[0];
     for (int i = 1; i < num_lines && i < 16; i++)
-        strcat(leaderboard_text, user_data[i]);
+        strcat(leader_board_text, user_data[i]);
 
     SDL_Color color = {255, 255, 255};
 
-    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, leaderboard_text, color, WINDOW_WIDTH / 4);
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, leader_board_text, color, WINDOW_WIDTH / 4);
     if (!surface) {
-        printf("error creating leaderboard surface\n");
+        printf("error creating leader_board surface\n");
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         SDL_Quit();
     }
 
-    SDL_Texture *leaderboard_texture = SDL_CreateTextureFromSurface(rend, surface);
+    SDL_Texture *leader_board_texture = SDL_CreateTextureFromSurface(rend, surface);
     SDL_FreeSurface(surface);
 
-    SDL_Rect leaderboard_rect = make_textbox(leaderboard_texture, 0, WINDOW_HEIGHT/8, 1, CENTERED_X);
+    SDL_Rect leader_board_rect = make_textbox(leader_board_texture, 0, WINDOW_HEIGHT/8, 1, CENTERED_X);
 
     bool close_requested = false;
     while (!close_requested) {
@@ -281,12 +279,12 @@ int leaderboard_screen(void)
         }
 
         SDL_RenderClear(rend);
-        SDL_RenderCopy(rend, leaderboard_texture, NULL, &leaderboard_rect);
+        SDL_RenderCopy(rend, leader_board_texture, NULL, &leader_board_rect);
         SDL_RenderCopy(rend, heading_texture, NULL, &heading_rect);
         SDL_RenderPresent(rend);
         SDL_Delay(1000/60);
     }
-    SDL_DestroyTexture(leaderboard_texture);
+    SDL_DestroyTexture(leader_board_texture);
     SDL_DestroyTexture(heading_texture);
     return 0;
 }

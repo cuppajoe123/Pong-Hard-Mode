@@ -1,10 +1,10 @@
 #include "graphics.h"
-#include "leaderboard.h"
+#include "leader_board.h"
 
 /* save_user_data: concatenates score and username, then appends to the data file */
 int save_user_data(char *score, char *username)
 {
-    /* concatenates a space and then the username, then a newline to score. Score will then contain the entire leaderboard entry for that user */
+    /* concatenates a space and then the username, then a newline to score. Score will then contain the entire leader_board entry for that user */
     strncat(score, " ", strlen(" ") + strlen(score));
     strncat(score, username, strlen(username) + strlen(score));
     strncat(score, "\n", strlen("\n") + strlen(score));

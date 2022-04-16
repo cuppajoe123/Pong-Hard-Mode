@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "graphics.h"
-#include "leaderboard.h"
+#include "leader_board.h"
 
 int main(void)
 {
@@ -237,7 +237,7 @@ int main(void)
 
     save_user_data(score_str, username);
 
-    if (leaderboard_screen() == 1) {
+    if (leader_board_screen() == 1) {
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);

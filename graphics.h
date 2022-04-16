@@ -23,6 +23,6 @@ int init_graphics(void);
 SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args);
 int start_screen(void);
 int username_screen(char *username);
-int leaderboard_screen(void);
+int leader_board_screen(void);
 
 #endif

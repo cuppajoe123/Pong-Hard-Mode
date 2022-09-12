@@ -11,10 +11,19 @@
 #include "graphics.h"
 #include "leader_board.h"
 
+#include "/home/joe/coding/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/emscripten.h"
+
+int mainloop(void);
+
 int main(void)
 {
-    /* IMPORTANT: try getting rid of position structs */
+    
+	emscriptem_set_main_loop(mainloop, 0, 1);
+	
+}
 
+int mainloop(void)
+{
     init_graphics();
 
     SDL_Texture *paddle_tex = make_texture_img("resources/paddle.png");
@@ -79,6 +88,9 @@ int main(void)
 
     // start screen loop
     if (start_screen() == 1) {
+        
+		emscriptem_set_main_loop(mainloop, 0, 1);
+		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -90,6 +102,9 @@ int main(void)
     // start username_screen
     char username[15] = "";
     if (username_screen(username) == 1) {
+        
+		emscriptem_set_main_loop(mainloop, 0, 1);
+		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -105,6 +120,9 @@ int main(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
+                    
+                    emscriptem_set_main_loop(mainloop, 0, 1);
+                    
                     TTF_CloseFont(font);
                     SDL_DestroyTexture(paddle_tex);
                     SDL_DestroyTexture(ball_tex);
@@ -245,6 +263,9 @@ int main(void)
     save_user_data(score_str, username);
 
     if (leader_board_screen() == 1) {
+        
+		emscriptem_set_main_loop(mainloop, 0, 1);
+		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -256,6 +277,9 @@ int main(void)
     }
 
     // clean up resources before exiting
+    
+    emscriptem_set_main_loop(mainloop, 0, 1);
+    
     TTF_CloseFont(font);
     SDL_DestroyTexture(paddle_tex);
     SDL_DestroyTexture(ball_tex);

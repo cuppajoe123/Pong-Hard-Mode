@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "graphics.h"
 #include "leader_board.h"
+#include "wasm.h"
 
 
 /* window, renderer, and font are global so every function can access them without having to pass them in */

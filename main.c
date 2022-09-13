@@ -10,19 +10,22 @@
 #include <stdbool.h>
 #include "graphics.h"
 #include "leader_board.h"
+#include "wasm.h"
 
-#include "/home/joe/coding/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/emscripten.h"
-
-int mainloop(void);
+void mainloop(void);
 
 int main(void)
 {
-    
-	emscriptem_set_main_loop(mainloop, 0, 1);
-	
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop(mainloop, 0, 1);
+#endif
+
+#ifndef __EMSCRIPTEN__
+    mainloop();
+#endif
 }
 
-int mainloop(void)
+void mainloop(void)
 {
     init_graphics();
 
@@ -88,8 +91,9 @@ int mainloop(void)
 
     // start screen loop
     if (start_screen() == 1) {
-        
-		emscriptem_set_main_loop(mainloop, 0, 1);
+#ifdef __EMSCRIPTEN__
+		emscripten_cancel_main_loop();
+#endif
 		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
@@ -97,13 +101,13 @@ int mainloop(void)
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         TTF_Quit();
-        return 0;
     }
     // start username_screen
     char username[15] = "";
     if (username_screen(username) == 1) {
-        
-		emscriptem_set_main_loop(mainloop, 0, 1);
+#ifdef __EMSCRIPTEN__
+		emscripten_cancel_main_loop();
+#endif
 		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
@@ -111,7 +115,6 @@ int mainloop(void)
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         TTF_Quit();
-        return 0;
     }
     // main game loop
     while (!close_requested) {
@@ -120,8 +123,9 @@ int mainloop(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    
-                    emscriptem_set_main_loop(mainloop, 0, 1);
+#ifdef __EMSCRIPTEN__
+                    emscripten_cancel_main_loop();
+#endif
                     
                     TTF_CloseFont(font);
                     SDL_DestroyTexture(paddle_tex);
@@ -130,7 +134,6 @@ int mainloop(void)
                     SDL_DestroyWindow(win);
                     TTF_Quit();
                     SDL_Quit();
-                    return 0;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_W:
@@ -263,8 +266,9 @@ int mainloop(void)
     save_user_data(score_str, username);
 
     if (leader_board_screen() == 1) {
-        
-		emscriptem_set_main_loop(mainloop, 0, 1);
+#ifdef __EMSCRIPTEN__
+		emscripten_cancel_main_loop();
+#endif
 		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
@@ -273,12 +277,12 @@ int mainloop(void)
         SDL_DestroyWindow(win);
         TTF_Quit();
         SDL_Quit();
-        return 0;
     }
 
     // clean up resources before exiting
-    
-    emscriptem_set_main_loop(mainloop, 0, 1);
+#ifdef __EMSCRIPTEN__
+    emscripten_cancel_main_loop();
+#endif
     
     TTF_CloseFont(font);
     SDL_DestroyTexture(paddle_tex);
@@ -287,5 +291,4 @@ int mainloop(void)
     SDL_DestroyWindow(win);
     TTF_Quit();
     SDL_Quit();
-    return 0;
 }

@@ -36,4 +36,4 @@ clean:
 .PHONY: all clean
 
 wasm: *.c
-		emcc $^ -o index.html -g -lm -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]'
+		emcc $^ -D__EMSCRIPTEN__ -o index.html -g -lm -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]'

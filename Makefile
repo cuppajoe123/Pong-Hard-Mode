@@ -31,9 +31,6 @@ $(EXEC): $(OBJS) $(HDRS) Makefile
 
 # recipe to clean the workspace
 clean:
-	rm -f $(EXEC) $(OBJS) *.html *.data *.js *.wasm
+	rm -f $(EXEC) $(OBJS)
 
 .PHONY: all clean
-
-wasm: *.c
-		emcc $^ -o index.html -g -lm -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]'

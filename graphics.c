@@ -180,8 +180,8 @@ int start_screen(void)
     args.prompt_rect = make_textbox(args.prompt_texture, 0, WINDOW_HEIGHT / 1.5, 1, CENTERED_X);
     emscripten_request_animation_frame_loop(start_screen_poll, args);
 
-    SDL_DestroyTexture(argstitle_texture);
-    SDL_DestroyTexture(prompt_texture);
+    SDL_DestroyTexture(args.title_texture);
+    SDL_DestroyTexture(args.prompt_texture);
     return 0;
 #else
     SDL_Texture *title_texture = make_texture_str("Pong: Hard Mode");
@@ -221,6 +221,7 @@ int start_screen(void)
 }
 
 #ifdef __EMSCRIPTEN__
+/* username_screen_poll: a single iteration of username_screen loop, for wasm port */
 static EM_BOOL username_screen_poll(void *args) {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -260,13 +261,13 @@ int username_screen(char *username)
         char *username;
     } args;
     args.prompt_texture = make_texture_str("Enter a username");
-    args.prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
+    args.prompt_rect = make_textbox(args.prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
     args.username = username;
     SDL_StartTextInput();
     emscripten_request_animation_frame_loop(username_screen_poll, args);
 
     SDL_StopTextInput();
-    SDL_DestroyTexture(prompt_texture);
+    SDL_DestroyTexture(args.prompt_texture);
     return 0;
 #else
     /* must pass in a char array for the username to avoid conflicts */
@@ -311,6 +312,31 @@ int username_screen(char *username)
 #endif
 }
 
+#ifdef __EMSCRIPTEN__
+/* leader_board_screen_poll: a single iteration of leader_board_screen loop, for wasm port */
+static EM_BOOL leader_board_screen_poll(void *args) {
+    SDL_Event event;
+    SDL_PollEvent(&event);
+    switch (event.type) {
+        case SDL_QUIT:
+            return EM_FALSE;
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.scancode) {
+                case SDL_SCANCODE_RETURN:
+                    return EM_FALSE
+                    break;
+            }
+            break;
+    }
+
+    SDL_RenderClear(rend);
+    SDL_RenderCopy(rend, leader_board_texture, NULL, &leader_board_rect);
+    SDL_RenderCopy(rend, heading_texture, NULL, &heading_rect);
+    SDL_RenderPresent(rend);
+    return EM_TRUE;
+}
+#endif
+
 /* leader_board_screen: reads all user data from the file as an array of strings, sorts the strings based on their score, concatenates each string, then renders it to the screen */
 int leader_board_screen(void)
 {
@@ -345,6 +371,21 @@ int leader_board_screen(void)
         SDL_Quit();
     }
 
+#ifdef __EMSCRIPTEN__
+    struct {
+        SDL_Texture *leader_board_texture;
+        SDL_Rect leader_board_rect;
+    } args;
+
+    args.leader_board_texture = SDL_CreateTextureFromSurface(rend, surface);
+    SDL_FreeSurface(surface);
+    args.leader_board_rect = make_textbox(args.leader_board_texture, 0, WINDOW_HEIGHT/8, 1, CENTERED_X);
+    emscripten_request_animation_frame_loop(leader_board_screen_poll, args);
+
+    SDL_DestroyTexture(args.leader_board_texture);
+    return 0;
+#else
+
     SDL_Texture *leader_board_texture = SDL_CreateTextureFromSurface(rend, surface);
     SDL_FreeSurface(surface);
 
@@ -378,4 +419,5 @@ int leader_board_screen(void)
     SDL_DestroyTexture(leader_board_texture);
     SDL_DestroyTexture(heading_texture);
     return 0;
+#endif
 }

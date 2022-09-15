@@ -220,9 +220,55 @@ int start_screen(void)
 #endif
 }
 
+#ifdef __EMSCRIPTEN__
+static EM_BOOL username_screen_poll(void *args) {
+    SDL_Event event;
+    SDL_PollEvent(&event);
+    switch (event.type) {
+        case SDL_QUIT:
+            return EM_FALSE;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(args->username) > 0) {
+                args->username[strlen(args->username)-1] = '\0';
+            }
+            if (event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+                return EM_FALSE;
+            break;
+        case SDL_TEXTINPUT:
+            if (strlen(args->username) + strlen(event.text.text) < 15)
+                strncat(args->username, event.text.text, 15);
+            break;
+    }
+    SDL_Texture *username_texture = make_texture_str(args->username);
+    SDL_Rect username_rect = make_textbox(username_texture, 0, WINDOW_HEIGHT / 2, 1.5, CENTERED_X);
+    SDL_RenderClear(rend);
+    SDL_RenderCopy(rend, args->prompt_texture, NULL, &args->prompt_rect);
+    SDL_RenderCopy(rend, username_texture, NULL, &username_rect);
+    SDL_RenderPresent(rend);
+    SDL_DestroyTexture(username_texture);
+    return EM_TRUE;
+}
+#endif
+
 /* username_screen: prompts the user for a name to later write. The text is updated when the user adds characters or deletes characters. Pressing enter confirms their username choice and returns */
 int username_screen(char *username)
 {
+#ifdef __EMSCRIPTEN__
+    struct {
+        SDL_Texture *prompt_texture;
+        SDL_Rect prompt_rect;
+        char *username;
+    } args;
+    args.prompt_texture = make_texture_str("Enter a username");
+    args.prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
+    args.username = username;
+    SDL_StartTextInput();
+    emscripten_request_animation_frame_loop(username_screen_poll, args);
+
+    SDL_StopTextInput();
+    SDL_DestroyTexture(prompt_texture);
+    return 0;
+#else
     /* must pass in a char array for the username to avoid conflicts */
     SDL_Texture *prompt_texture= make_texture_str("Enter a username");
     SDL_Rect prompt_rect = make_textbox(prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
@@ -262,6 +308,7 @@ int username_screen(char *username)
     SDL_StopTextInput();
     SDL_DestroyTexture(prompt_texture);
     return 0;
+#endif
 }
 
 /* leader_board_screen: reads all user data from the file as an array of strings, sorts the strings based on their score, concatenates each string, then renders it to the screen */

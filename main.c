@@ -12,20 +12,7 @@
 #include "leader_board.h"
 #include "wasm.h"
 
-void mainloop(void);
-
 int main(void)
-{
-#ifdef __EMSCRIPTEN__
-	emscripten_set_main_loop(mainloop, 0, 1);
-#endif
-
-#ifndef __EMSCRIPTEN__
-    mainloop();
-#endif
-}
-
-void mainloop(void)
 {
     init_graphics();
 
@@ -91,10 +78,6 @@ void mainloop(void)
 
     // start screen loop
     if (start_screen() == 1) {
-#ifdef __EMSCRIPTEN__
-		emscripten_cancel_main_loop();
-#endif
-		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -105,10 +88,6 @@ void mainloop(void)
     // start username_screen
     char username[15] = "";
     if (username_screen(username) == 1) {
-#ifdef __EMSCRIPTEN__
-		emscripten_cancel_main_loop();
-#endif
-		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -123,10 +102,6 @@ void mainloop(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-#ifdef __EMSCRIPTEN__
-                    emscripten_cancel_main_loop();
-#endif
-                    
                     TTF_CloseFont(font);
                     SDL_DestroyTexture(paddle_tex);
                     SDL_DestroyTexture(ball_tex);
@@ -266,10 +241,6 @@ void mainloop(void)
     save_user_data(score_str, username);
 
     if (leader_board_screen() == 1) {
-#ifdef __EMSCRIPTEN__
-		emscripten_cancel_main_loop();
-#endif
-		
         TTF_CloseFont(font);
         SDL_DestroyTexture(paddle_tex);
         SDL_DestroyTexture(ball_tex);
@@ -280,10 +251,6 @@ void mainloop(void)
     }
 
     // clean up resources before exiting
-#ifdef __EMSCRIPTEN__
-    emscripten_cancel_main_loop();
-#endif
-    
     TTF_CloseFont(font);
     SDL_DestroyTexture(paddle_tex);
     SDL_DestroyTexture(ball_tex);

@@ -138,31 +138,30 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
     return rect;
 }
 
-
 #ifdef __EMSCRIPTEN__
-static int start_screen_poll(SDL_Texture *title_texture, SDL_Rect title_rect, SDL_Texture *prompt_texture, SDL_Rect prompt_rect) {
+/* start_screen_poll: a single iteration of start_screen loop, for wasm port */
+static EM_BOOL start_screen_poll(void *args) {
     SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) {
         case SDL_QUIT:
             /* returning SDL_QUIT causes program to shut down */
-            return SDL_QUIT;
+            return EM_FALSE;
         case SDL_KEYDOWN:
             switch (event.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
-                    return 1;
+                    return EM_FALSE;
             }
         default:
             break;
     }
     SDL_RenderClear(rend);
-    SDL_RenderCopy(rend, title_texture, NULL, &title_rect);
-    SDL_RenderCopy(rend, prompt_texture, NULL, &prompt_rect);
+    SDL_RenderCopy(rend, args->title_texture, NULL, &args->title_rect); // or is it args->&title_rect
+    SDL_RenderCopy(rend, args->prompt_texture, NULL, &args->prompt_rect);
     SDL_RenderPresent(rend);
-    return 0;
+    return EM_TRUE;
 }
 #endif
-
 
 /* start_screen: main animation loop for rendering the start screen. When the player hits enter, the function returns, and the next screen can be rendered */
 int start_screen(void)

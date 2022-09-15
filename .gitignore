@@ -2,6 +2,7 @@
 *.html
 *.js
 *.wasm
+*.data
 
 # Prerequisites
 *.d

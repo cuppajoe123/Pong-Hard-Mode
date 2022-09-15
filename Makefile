@@ -4,7 +4,7 @@
 CC := gcc
 
 # set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -Og -pg -g -Wall -lSDL2_image -lSDL2_ttf -lm 
+CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -Og -pg -g -Wall -lSDL2_image -lSDL2_ttf -lm
 
 # add header files here
 HDRS := graphics.h leader_board.h
@@ -36,4 +36,4 @@ clean:
 .PHONY: all clean
 
 wasm: *.c
-		emcc $^ -D__EMSCRIPTEN__ -o index.html -g -lm -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]'
+		emcc $^ -D__EMSCRIPTEN__ -o index.html -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]' --preload-file resources --use-preload-plugins

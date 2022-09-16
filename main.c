@@ -42,7 +42,9 @@ int main(void)
 {
     init_graphics();
 
+#ifdef __EMSCRIPTEN__
     struct main_state args;
+#endif
 
     SDL_Texture *paddle_tex = make_texture_img("resources/paddle.png");
     // struct to hold the position and size of both paddle sprites

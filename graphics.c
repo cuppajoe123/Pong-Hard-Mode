@@ -11,6 +11,28 @@ SDL_Window *win;
 SDL_Renderer *rend;
 TTF_Font *font;
 
+#ifdef __EMSCRIPTEN__
+struct start_screen_state {
+    SDL_Texture *title_texture;
+    SDL_Rect title_rect;
+    SDL_Texture *prompt_texture;
+    SDL_Rect prompt_rect;
+};
+
+struct username_screen_state {
+    SDL_Texture *prompt_texture;
+    SDL_Rect prompt_rect;
+    char *username;
+}; 
+
+struct leader_board_screen_state {
+    SDL_Texture *leader_board_texture;
+    SDL_Rect leader_board_rect;
+    SDL_Texture *heading_texture;
+    SDL_Rect heading_rect;
+};
+#endif
+
 /* init_graphics: initializes SDL, font, window, and renderer with checks for errors */
 int init_graphics(void)
 {
@@ -140,7 +162,8 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
 
 #ifdef __EMSCRIPTEN__
 /* start_screen_poll: a single iteration of start_screen loop, for wasm port */
-static EM_BOOL start_screen_poll(void *args) {
+static EM_BOOL start_screen_poll(double time, void *args) {
+    struct start_screen_state *state = (struct start_screen_state *)args;
     SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) {
@@ -156,8 +179,8 @@ static EM_BOOL start_screen_poll(void *args) {
             break;
     }
     SDL_RenderClear(rend);
-    SDL_RenderCopy(rend, args->title_texture, NULL, &args->title_rect); // or is it args->&title_rect
-    SDL_RenderCopy(rend, args->prompt_texture, NULL, &args->prompt_rect);
+    SDL_RenderCopy(rend, state->title_texture, NULL, &state->title_rect); // or is it state->&title_rect
+    SDL_RenderCopy(rend, state->prompt_texture, NULL, &state->prompt_rect);
     SDL_RenderPresent(rend);
     return EM_TRUE;
 }
@@ -167,18 +190,12 @@ static EM_BOOL start_screen_poll(void *args) {
 int start_screen(void)
 {
 #ifdef __EMSCRIPTEN__
-    struct {
-        SDL_Texture *title_texture;
-        SDL_Rect title_rect;
-        SDL_Texture *prompt_texture;
-        SDL_Rect prompt_rect;
-    } args;
-
+    struct start_screen_state args;
     args.title_texture = make_texture_str("Pong: Hard Mode");
     args.title_rect = make_textbox(args.title_texture, 0, WINDOW_HEIGHT / 2, 2, CENTERED_X | CENTERED_Y);
     args.prompt_texture = make_texture_str("Press ENTER to start");
     args.prompt_rect = make_textbox(args.prompt_texture, 0, WINDOW_HEIGHT / 1.5, 1, CENTERED_X);
-    emscripten_request_animation_frame_loop(start_screen_poll, args);
+    emscripten_request_animation_frame_loop(start_screen_poll, &args);
 
     SDL_DestroyTexture(args.title_texture);
     SDL_DestroyTexture(args.prompt_texture);
@@ -222,28 +239,29 @@ int start_screen(void)
 
 #ifdef __EMSCRIPTEN__
 /* username_screen_poll: a single iteration of username_screen loop, for wasm port */
-static EM_BOOL username_screen_poll(void *args) {
+static EM_BOOL username_screen_poll(double time, void *args) {
+    struct username_screen_state *state = (struct username_screen_state *)args;
     SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) {
         case SDL_QUIT:
             return EM_FALSE;
         case SDL_KEYDOWN:
-            if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(args->username) > 0) {
-                args->username[strlen(args->username)-1] = '\0';
+            if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(state->username) > 0) {
+                state->username[strlen(state->username)-1] = '\0';
             }
             if (event.key.keysym.scancode == SDL_SCANCODE_RETURN)
                 return EM_FALSE;
             break;
         case SDL_TEXTINPUT:
-            if (strlen(args->username) + strlen(event.text.text) < 15)
-                strncat(args->username, event.text.text, 15);
+            if (strlen(state->username) + strlen(event.text.text) < 15)
+                strncat(state->username, event.text.text, 15);
             break;
     }
-    SDL_Texture *username_texture = make_texture_str(args->username);
+    SDL_Texture *username_texture = make_texture_str(state->username);
     SDL_Rect username_rect = make_textbox(username_texture, 0, WINDOW_HEIGHT / 2, 1.5, CENTERED_X);
     SDL_RenderClear(rend);
-    SDL_RenderCopy(rend, args->prompt_texture, NULL, &args->prompt_rect);
+    SDL_RenderCopy(rend, state->prompt_texture, NULL, &state->prompt_rect);
     SDL_RenderCopy(rend, username_texture, NULL, &username_rect);
     SDL_RenderPresent(rend);
     SDL_DestroyTexture(username_texture);
@@ -255,16 +273,12 @@ static EM_BOOL username_screen_poll(void *args) {
 int username_screen(char *username)
 {
 #ifdef __EMSCRIPTEN__
-    struct {
-        SDL_Texture *prompt_texture;
-        SDL_Rect prompt_rect;
-        char *username;
-    } args;
+    struct username_screen_state args;
     args.prompt_texture = make_texture_str("Enter a username");
     args.prompt_rect = make_textbox(args.prompt_texture, 0, WINDOW_HEIGHT / 4, 2, CENTERED_X);
     args.username = username;
     SDL_StartTextInput();
-    emscripten_request_animation_frame_loop(username_screen_poll, args);
+    emscripten_request_animation_frame_loop(username_screen_poll, &args);
 
     SDL_StopTextInput();
     SDL_DestroyTexture(args.prompt_texture);
@@ -314,7 +328,8 @@ int username_screen(char *username)
 
 #ifdef __EMSCRIPTEN__
 /* leader_board_screen_poll: a single iteration of leader_board_screen loop, for wasm port */
-static EM_BOOL leader_board_screen_poll(void *args) {
+static EM_BOOL leader_board_screen_poll(double time, void *args) {
+    struct leader_board_screen_state *state = (struct leader_board_screen_state *)args;
     SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) {
@@ -323,15 +338,14 @@ static EM_BOOL leader_board_screen_poll(void *args) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
-                    return EM_FALSE
-                    break;
+                    return EM_FALSE;
             }
             break;
     }
 
     SDL_RenderClear(rend);
-    SDL_RenderCopy(rend, leader_board_texture, NULL, &leader_board_rect);
-    SDL_RenderCopy(rend, heading_texture, NULL, &heading_rect);
+    SDL_RenderCopy(rend, state->leader_board_texture, NULL, &state->leader_board_rect);
+    SDL_RenderCopy(rend, state->heading_texture, NULL, &state->heading_rect);
     SDL_RenderPresent(rend);
     return EM_TRUE;
 }
@@ -372,15 +386,13 @@ int leader_board_screen(void)
     }
 
 #ifdef __EMSCRIPTEN__
-    struct {
-        SDL_Texture *leader_board_texture;
-        SDL_Rect leader_board_rect;
-    } args;
-
+    struct leader_board_screen_state args;
     args.leader_board_texture = SDL_CreateTextureFromSurface(rend, surface);
     SDL_FreeSurface(surface);
     args.leader_board_rect = make_textbox(args.leader_board_texture, 0, WINDOW_HEIGHT/8, 1, CENTERED_X);
-    emscripten_request_animation_frame_loop(leader_board_screen_poll, args);
+    args.heading_texture = heading_texture;
+    args.heading_rect = heading_rect;
+    emscripten_request_animation_frame_loop(leader_board_screen_poll, &args);
 
     SDL_DestroyTexture(args.leader_board_texture);
     return 0;

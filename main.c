@@ -12,9 +12,37 @@
 #include "leader_board.h"
 #include "wasm.h"
 
+#ifdef __EMSCRIPTEN__
+static EM_BOOL mainloop(void *args);
+#endif
+
 int main(void)
 {
     init_graphics();
+
+#ifdef __EMSCRIPTEN__
+    struct {
+        SDL_Texture *paddle_tex;
+        SDL_Texture *ball_tex;
+
+        SDL_Rect left_pad;
+        SDL_Rect right_pad;
+        SDL_Rect ball1;
+        SDL_Rect ball2;
+
+        int ball1_x_vel;
+        int ball1_y_vel;
+        int ball2_x_vel;
+        int ball2_y_vel;
+
+        int pad_x_vel;
+        int pad_y_vel;
+        bool pad_up;
+        bool pad_down;
+
+        char score_str[80];
+    } args;
+#endif
 
     SDL_Texture *paddle_tex = make_texture_img("resources/paddle.png");
     // struct to hold the position and size of both paddle sprites
@@ -70,11 +98,27 @@ int main(void)
 
     bool close_requested = false;
 
-    // counter is the amount of frames the second ball waits to start moving
-    int counter = 0;
 
-    long score_int = 0;
     char score_str[80] = "";
+
+#if __EMSCRIPTEN__
+    args.paddle_tex = paddle_tex;
+    args.ball_tex = ball_tex;
+    args.left_pad = left_pad;
+    args.right_pad = right_pad;
+    args.ball1 = ball1;
+    args.ball2 = ball2;
+    args.ball1_x_vel = ball1_x_vel;
+    args.ball1_y_vel = ball1_y_vel;
+    args.ball2_x_vel = ball2_x_vel;
+    args.ball2_y_vel = ball2_y_vel;
+    args.pad_x_vel = pad_x_vel;
+    args.pad_y_vel = pad_y_vel;
+    args.pad_up = pad_up;
+    args.pad_down = pad_down;
+    args.score_str = score_str;
+#endif
+
 
     // start screen loop
     if (start_screen() == 1) {
@@ -95,8 +139,19 @@ int main(void)
         SDL_DestroyWindow(win);
         TTF_Quit();
     }
+
+#ifdef __EMSCRIPTEN__
+    emscripten_request_animation_frame_loop(mainloop, args);
+    SDL_DestroyTexture(args.paddle_tex);
+    SDL_DestroyTexture(args.ball_tex);
+    return 0;
+#endif
+        
     // main game loop
     while (!close_requested) {
+        // counter is the amount of frames the second ball waits to start moving
+        static int counter = 0;
+        static long score_int = 0;
         // process events
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -259,3 +314,141 @@ int main(void)
     TTF_Quit();
     SDL_Quit();
 }
+
+#ifdef __EMSCRIPTEN__
+static EM_BOOL mainloop(void *args) {
+        static int counter = 0;
+        static long score_int = 0;
+        // process events
+        SDL_Event event;
+        SDL_PollEvent(&event);
+        switch (event.type) {
+            case SDL_QUIT:
+                return EM_BOOL;
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.scancode) {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        args->pad_up = true;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        args->pad_down = true;
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch (event.key.keysym.scancode) {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        args->pad_up = false;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        args->pad_down = false;
+                        break;
+                }
+                break;
+        }
+
+
+        // checks if args->ball should bounce off top or bottom of screen
+        if (args->ball1.y <= 0) {
+            args->ball1.y = 0;
+            args->ball1_y_vel = -args->ball1_y_vel;
+        }
+        if (args->ball1.y >= WINDOW_HEIGHT - args->ball1.h) {
+            args->ball1.y = WINDOW_HEIGHT - args->ball1.h;
+            args->ball1_y_vel = -args->ball1_y_vel;
+        }
+
+        // checks if either args->ball got past the paddles
+        if (args->ball1.x <= 0) return EM_FALSE;
+        if (args->ball1.x >= WINDOW_WIDTH) return EM_FALSE;
+        if (args->ball2.x <= 0) return EM_FALSE;
+        if (args->ball2.x >= WINDOW_WIDTH) return EM_FALSE;
+
+
+        // collision detection for paddles
+        if (args->ball1.x >= args->left_pad.x && args->ball1.x <= args->left_pad.x + args->left_pad.w && args->ball1.y >= args->left_pad.y && args->ball1.y <= args->left_pad.y + args->left_pad.h) {
+            args->ball1_x_vel = -args->ball1_x_vel;
+            score_int += 10;
+        }
+        if (args->ball1.x + args->ball1.w >= args->right_pad.x && args->ball1.x + args->ball1.w <= args->right_pad.x + args->right_pad.w && args->ball1.y >= args->right_pad.y && args->ball1.y <= args->right_pad.y + args->right_pad.h) {
+            args->ball1_x_vel = -args->ball1_x_vel;
+            score_int += 10;
+        }
+
+        args->ball1.x += args->ball1_x_vel / 60;
+        args->ball1.y += args->ball1_y_vel / 60;
+
+
+        if (counter++ >= 120) {
+            // same code as for args->ball1 
+            if (args->ball2.y <= 0) {
+                args->ball2.y = 0;
+                args->ball2_y_vel = -args->ball2_y_vel;
+            }
+            if (args->ball2.y >= WINDOW_HEIGHT - args->ball2.h) {
+                args->ball2.y = WINDOW_HEIGHT - args->ball2.h;
+                args->ball2_y_vel = -args->ball2_y_vel;
+            }
+
+            if (args->ball2.x >= args->left_pad.x && args->ball2.x <= args->left_pad.x + args->left_pad.w && args->ball2.y >= args->left_pad.y && args->ball2.y <= args->left_pad.y + args->left_pad.h) {
+                args->ball2_x_vel = -args->ball2_x_vel;
+                score_int += 10;
+            }
+            if (args->ball2.x + args->ball2.w >= args->right_pad.x && args->ball2.x + args->ball2.w <= args->right_pad.x + args->right_pad.w && args->ball2.y >= args->right_pad.y && args->ball2.y <= args->right_pad.y + args->right_pad.h) {
+                args->ball2_x_vel = -args->ball2_x_vel;
+                score_int += 10;
+            }
+
+            args->ball2.x += args->ball2_x_vel / 60;
+            args->ball2.y += args->ball2_y_vel / 60;
+        }
+
+
+        // determine velocity of paddles
+        args->pad_x_vel = args->pad_y_vel = 0;
+        if (args->pad_up && !args->pad_down) args->pad_y_vel = -SPEED - 100;
+        if (args->pad_down && !args->pad_up) args->pad_y_vel = SPEED + 100;
+
+        // update positions of paddles
+        args->left_pad.x += args->pad_x_vel / 60;
+        args->right_pad.x += args->pad_x_vel / 60;
+        args->left_pad.y += args->pad_y_vel / 60;
+        args->right_pad.y += args->pad_y_vel / 60;
+
+        // collision detection with bounds
+        // only checks left paddle because both paddles will have the same y position
+        if (args->left_pad.y <= 0) {
+            args->left_pad.y = 0;
+            args->right_pad.y = 0;
+        }
+        if (args->left_pad.y >= WINDOW_HEIGHT - args->left_pad.h) {
+            args->left_pad.y = WINDOW_HEIGHT - args->left_pad.h;
+            args->right_pad.y = WINDOW_HEIGHT - args->right_pad.h;
+        }
+
+
+        // Creates surface and texture for scoreboard
+        sprintf(args->score_str, "%ld", score_int);
+        SDL_Texture *scoreboard_texture = make_texture_str(args->score_str);
+        SDL_Rect score_rect = make_textbox(scoreboard_texture, 0, 0, 1, 0x0);
+
+        // clear the window
+        SDL_RenderClear(rend);
+
+        // draw all of the textures to the window
+        SDL_RenderCopy(rend, args->paddle_tex, NULL, &args->left_pad);
+        SDL_RenderCopy(rend, args->paddle_tex, NULL, &args->right_pad);
+        SDL_RenderCopy(rend, args->args->ball_tex, NULL, &args->ball1);
+        SDL_RenderCopy(rend, args->args->ball_tex, NULL, &args->ball2);
+        SDL_RenderCopy(rend, scoreboard_texture, NULL, &score_rect);
+        SDL_RenderPresent(rend);
+
+        SDL_DestroyTexture(scoreboard_texture);
+        return EM_TRUE;
+    }
+}
+#endif

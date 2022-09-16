@@ -15,3 +15,6 @@ These are the packages that need to be installed on Debian-based systems. Other 
 Invoke the Makefile to build the program in the current directory.
 
 `$ make`
+
+TODO:
+Use a goto statement to handle errors in a single place
